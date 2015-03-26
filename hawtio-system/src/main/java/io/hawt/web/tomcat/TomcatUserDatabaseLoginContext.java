@@ -1,7 +1,13 @@
 package io.hawt.web.tomcat;
 
-import java.io.File;
-import java.util.Map;
+import io.hawt.util.Predicate;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -12,12 +18,11 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * To use Apache Tomcat's conf/tomcat-users.xml user database as JAAS {@link javax.security.auth.login.LoginContext},
@@ -30,6 +35,46 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
     private CallbackHandler callbackHandler;
     private String fileName = "conf/tomcat-users.xml";
     private File file;
+    private static final List<? extends Predicate<PasswordPair>> PASSWORD_CHECKS = Collections.unmodifiableList(
+        Arrays.asList(
+            new Predicate<PasswordPair>() {
+                @Override
+                public boolean evaluate(final PasswordPair passwordPair) {
+                    return passwordPair.getFilePassword().equals(passwordPair.getSuppliedPassword());
+                }
+            },
+            new Predicate<PasswordPair>() {
+                @Override
+                public boolean evaluate(final PasswordPair passwordPair) {
+                    return passwordPair.getFilePassword().equals(DigestUtils.md5Hex(passwordPair.getSuppliedPassword()));
+                }
+            },
+            new Predicate<PasswordPair>() {
+                @Override
+                public boolean evaluate(final PasswordPair passwordPair) {
+                    return passwordPair.getFilePassword().equals(DigestUtils.sha256Hex(passwordPair.getSuppliedPassword()));
+                }
+            },
+            new Predicate<PasswordPair>() {
+                @Override
+                public boolean evaluate(final PasswordPair passwordPair) {
+                    return passwordPair.getFilePassword().equals(DigestUtils.shaHex(passwordPair.getSuppliedPassword()));
+                }
+            },
+            new Predicate<PasswordPair>() {
+                @Override
+                public boolean evaluate(final PasswordPair passwordPair) {
+                    return passwordPair.getFilePassword().equals(DigestUtils.sha512Hex(passwordPair.getSuppliedPassword()));
+                }
+            },
+            new Predicate<PasswordPair>() {
+                @Override
+                public boolean evaluate(final PasswordPair passwordPair) {
+                    return passwordPair.getFilePassword().equals(DigestUtils.sha384Hex(passwordPair.getSuppliedPassword()));
+                }
+            }
+        )
+    );
 
     @Override
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
@@ -64,7 +109,7 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
             LOG.debug("Getting user details for username {}", username);
             String[] user = getUserPasswordRole(username);
             if (user != null) {
-                if (!password.equals(user[1])) {
+                if (!passwordsMatch(new PasswordPair(user[1], password))) {
                     LOG.trace("Login denied due password did not match");
                     return false;
                 }
@@ -89,6 +134,19 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
         }
 
         return true;
+    }
+
+    protected boolean passwordsMatch(PasswordPair passwordPair) {
+        for (Predicate<PasswordPair> passwordCheck : PASSWORD_CHECKS) {
+            try {
+                if (passwordCheck.evaluate(passwordPair)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                LOG.warn("Login check failed with exception; continuing", e);
+            }
+        }
+        return false;
     }
 
     @Override
@@ -125,6 +183,24 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
             }
         }
         return null;
+    }
+
+    private static class PasswordPair {
+        private final String filePassword;
+        private final String suppliedPassword;
+
+        private PasswordPair(final String filePassword, final String suppliedPassword) {
+            this.filePassword = filePassword;
+            this.suppliedPassword = suppliedPassword;
+        }
+
+        public String getFilePassword() {
+            return filePassword;
+        }
+
+        public String getSuppliedPassword() {
+            return suppliedPassword;
+        }
     }
 
 }
