@@ -68,9 +68,6 @@ module Core {
         userDetails.username = username;
         userDetails.password = password;
 
-        jolokiaParams['username'] = username;
-        jolokiaParams['password'] = password;
-
         $.ajaxSetup({
           beforeSend: (xhr) => {
             xhr.setRequestHeader('Authorization', Core.getBasicAuthHeader(<string>username, <string>password));
