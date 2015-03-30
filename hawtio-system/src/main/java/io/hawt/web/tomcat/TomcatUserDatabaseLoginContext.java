@@ -19,9 +19,8 @@ import javax.security.auth.spi.LoginModule;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,46 +34,64 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
     private CallbackHandler callbackHandler;
     private String fileName = "conf/tomcat-users.xml";
     private File file;
-    private static final List<? extends Predicate<PasswordPair>> PASSWORD_CHECKS = Collections.unmodifiableList(
-        Arrays.asList(
+    private String digestAlgorithm;
+
+    private static final Map<String, Predicate<PasswordPair>> PASSWORD_CHECKS;
+    public static final String OPTION_DIGEST_ALGORITHM = "DIGEST_ALGORITHM";
+
+    static {
+        Map<String, Predicate<PasswordPair>> temp = new HashMap<>(6);
+        temp.put(
+            "NONE",
             new Predicate<PasswordPair>() {
                 @Override
                 public boolean evaluate(final PasswordPair passwordPair) {
                     return passwordPair.getFilePassword().equals(passwordPair.getSuppliedPassword());
                 }
-            },
+            });
+        temp.put(
+            "MD5",
             new Predicate<PasswordPair>() {
                 @Override
                 public boolean evaluate(final PasswordPair passwordPair) {
                     return passwordPair.getFilePassword().equals(DigestUtils.md5Hex(passwordPair.getSuppliedPassword()));
                 }
-            },
+            });
+        temp.put(
+            "SHA-256",
             new Predicate<PasswordPair>() {
                 @Override
                 public boolean evaluate(final PasswordPair passwordPair) {
                     return passwordPair.getFilePassword().equals(DigestUtils.sha256Hex(passwordPair.getSuppliedPassword()));
                 }
-            },
+            });
+        temp.put(
+            "SHA",
             new Predicate<PasswordPair>() {
                 @Override
                 public boolean evaluate(final PasswordPair passwordPair) {
                     return passwordPair.getFilePassword().equals(DigestUtils.shaHex(passwordPair.getSuppliedPassword()));
                 }
-            },
+            });
+        temp.put(
+            "SHA-512",
             new Predicate<PasswordPair>() {
                 @Override
                 public boolean evaluate(final PasswordPair passwordPair) {
                     return passwordPair.getFilePassword().equals(DigestUtils.sha512Hex(passwordPair.getSuppliedPassword()));
                 }
-            },
+            });
+        temp.put(
+            "SHA-384",
             new Predicate<PasswordPair>() {
                 @Override
                 public boolean evaluate(final PasswordPair passwordPair) {
                     return passwordPair.getFilePassword().equals(DigestUtils.sha384Hex(passwordPair.getSuppliedPassword()));
                 }
-            }
-        )
-    );
+            });
+        PASSWORD_CHECKS = Collections.unmodifiableMap(temp);
+    }
+
 
     @Override
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
@@ -87,6 +104,14 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
 
         if (!file.exists()) {
             String msg = "Cannot find Apache Tomcat user database file: " + file;
+            LOG.warn(msg);
+            throw new IllegalStateException(msg);
+        }
+
+        digestAlgorithm = options.get(OPTION_DIGEST_ALGORITHM).toString();
+
+        if (!PASSWORD_CHECKS.containsKey(digestAlgorithm)) {
+            String msg = "Invalid digest algorithm specified: " + digestAlgorithm + " (valid: " + PASSWORD_CHECKS.keySet() + ")";
             LOG.warn(msg);
             throw new IllegalStateException(msg);
         }
@@ -137,16 +162,7 @@ public class TomcatUserDatabaseLoginContext implements LoginModule {
     }
 
     protected boolean passwordsMatch(PasswordPair passwordPair) {
-        for (Predicate<PasswordPair> passwordCheck : PASSWORD_CHECKS) {
-            try {
-                if (passwordCheck.evaluate(passwordPair)) {
-                    return true;
-                }
-            } catch (Exception e) {
-                LOG.warn("Login check failed with exception; continuing", e);
-            }
-        }
-        return false;
+        return PASSWORD_CHECKS.get(digestAlgorithm).evaluate(passwordPair);
     }
 
     @Override
