@@ -22,11 +22,15 @@ module Core {
       var username:String = null;
       var password:String = null;
 
+      // found will be true, when we are connecting to remote jolokia
+      // in this case, there are two different credentials - one used to connect to host hawtio (which may not require authentication)
+      // and second - to connect to remote jolokia via /jvm/connect
       var found = false;
 
       // search for passed credentials when connecting to remote server
       try {
         if (window.opener && "passUserDetails" in window.opener) {
+          // these are credentials used to connect to remote jolokia
           username = window.opener["passUserDetails"].username;
           password = window.opener["passUserDetails"].password;
           found = true;
@@ -52,6 +56,12 @@ module Core {
           if (angular.isArray(username)) username = username[0];
           if (angular.isArray(password)) password = password[0];
         }
+      } else {
+        // we have case when passed (from window.opener) credentials will be used for Jolokia access
+        userDetails.remoteJolokiaUserDetails = {
+          username: username,
+          password: password
+        }
       }
 
       if (username && password) {
@@ -63,14 +73,16 @@ module Core {
 
         $.ajaxSetup({
           beforeSend: (xhr) => {
-            xhr.setRequestHeader('Authorization', Core.getBasicAuthHeader(<string>userDetails.username, <string>userDetails.password));
+            xhr.setRequestHeader('Authorization', Core.getBasicAuthHeader(<string>username, <string>password));
           }
         });
 
         var loginUrl = jolokiaUrl.replace("jolokia", "auth/login/");
         $.ajax(loginUrl, {
           type: "POST",
+          async: false, // ugly ugly ugly and soon, deprecated...
           success: (response) => {
+            jolokiaStatus.xhr = null;
             if (response['credentials'] || response['principals']) {
               userDetails.loginDetails = {
                 'credentials': response['credentials'],
@@ -86,6 +98,7 @@ module Core {
             Core.executePostLoginTasks();
           },
           error: (xhr, textStatus, error) => {
+            jolokiaStatus.xhr = xhr;
             // silently ignore, we could be using the proxy
             Core.executePostLoginTasks();
           }
@@ -98,6 +111,7 @@ module Core {
           userDetails.username = null;
           userDetails.password = null;
           delete userDetails.loginDetails;
+          delete userDetails.remoteJolokiaUserDetails;
           if (found) {
             delete window.opener["passUserDetails"];
           }
