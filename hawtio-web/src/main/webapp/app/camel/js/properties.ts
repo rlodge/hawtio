@@ -44,8 +44,6 @@ module Camel {
     });
 
     $scope.showEntity = function (id) {
-      log.debug("Show entity: " + id);
-
       if ($scope.hideDefault) {
         if (isDefaultValue(id)) {
           return false;
@@ -107,6 +105,8 @@ module Camel {
           $scope.nodeData = getRouteNodeJSON(routeXmlNode);
           $scope.icon = getRouteNodeIcon(routeXmlNode);
           $scope.viewTemplate = "app/camel/html/nodePropertiesView.html";
+
+          Core.$apply($scope);
         }
       }
     }

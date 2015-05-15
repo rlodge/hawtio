@@ -1,6 +1,16 @@
 /// <reference path="infinispanPlugin.ts"/>
 module Infinispan {
 
+  _module.controller("Infinispan.TreeHeaderController", ["$scope", ($scope) => {
+    $scope.expandAll = () => {
+      Tree.expandAll("#infinispantree");
+    };
+
+    $scope.contractAll = () => {
+      Tree.contractAll("#infinispantree");
+    };
+  }]);
+
   _module.controller("Infinispan.TreeController", ["$scope", "$location", "workspace", ($scope, $location:ng.ILocationService, workspace:Workspace) => {
 
     $scope.$on("$routeChangeSuccess", function (event, current, previous) {
@@ -47,10 +57,12 @@ module Infinispan {
               var cacheFolder = new Folder(name);
               cacheFolder.addClass = "org-infinispn-cache";
               cacheFolder.typeName = "Cache";
+              cacheFolder.parent = folder;
               cacheFolder.key = answer.key + "-" + cacheName;
               cacheFolder.objectName = value.objectName;
               cacheFolder.domain = value.domain;
               cacheFolder.entries = value.entries;
+              cacheFolder.tooltip = "Cache name: " + cacheName;
               answer.children.push(cacheFolder);
             } else {
               addAllCacheStatistics(value, answer);

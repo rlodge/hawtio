@@ -579,6 +579,15 @@ table .ep.editing {
   background: inherit;
 }
 
+div.ngGrid span.a[ng-click] {
+  color: #0088cc;
+  cursor: pointer;
+}
+div.ngGrid span.a[ng-click]:hover {
+  color: #005580;
+  text-decoration: underline;
+}
+
 .ngViewport {
   margin-left: 0px;
   margin-right: 0px;
@@ -758,15 +767,22 @@ ng-include > .nav.nav-tabs {
   margin-right: 0px;
 }
 
+.nav-tabs > li > span.a {
+  line-height: 24px;
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
 div#main div ul.nav li a,
 div#main div ul.nav li span {
   padding-bottom: 2px;
   padding-top: 2px;
 }
 
-div#main div ul.nav li a:hover {
+div#main div ul.nav li a:hover, div#main div ul.nav li span.a:hover {
   padding-bottom: 2px;
   padding-top: 2px;
+  cursor: pointer;
 }
 
 #main div div div section .tabbable .nav.nav-tabs {
@@ -1519,7 +1535,7 @@ h4 > .contained {
   padding: 5px 7px;
 }
 
-.selection-controls {
+.selection-controls, .profile-selection-controls {
   display: inline-block;
 }
 
@@ -1548,6 +1564,11 @@ h4 > .contained {
 .page-padded .section-header .selection-controls {
   position: relative;
   top: 1px;
+}
+
+.page-padded .section-header .profile-selection-controls {
+  position: relative;
+  top: 5px;
 }
 
 .section-controls > a,
@@ -1873,6 +1894,9 @@ div#main div ul.nav li a.nav-primary[disabled] {
 div#main div ul.nav li a.nav-primary:active,
 div#main div ul.nav li a.nav-primary.active {
   background-color: #003399 \9;
+}
+div#main div ul.nav li a.nav-primary-disabled {
+  cursor: default;
 }
 
 .nav.nav-tabs li a[disabled] {
@@ -2752,6 +2776,7 @@ li.profile-selector-folder span.folder-title:hover, li.profile div.profile-selec
   bottom: 0;
   left: 0;
   right: 0;
+  top: 0;
 }
 
 .ex-node-container {
@@ -4397,6 +4422,7 @@ ul.dynatree-container {
 .attributes-wrapper {
   width: 100%;
   overflow: auto;
+  clear: both
 }
 
 .separator {

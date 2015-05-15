@@ -1,6 +1,34 @@
 
 ### Change Log
 
+#### 1.4.51
+
+* Upgrade to Jolokia 1.3.0
+* Upgrade to Camel 2.15.2
+* Kubernetes plugin supports v1beta2 kubernetes api
+
+#### 1.4.50
+
+* Connect plugin no longer shows welcome screen when connecting to other JVMs
+* Fixed issue with missing dangle module from 1.4.49 release.
+* Fixed so the dashboard plugin is visible again
+* The wiki plugin is disabled for non fabric JVMs
+* Jetty 7 is no longer used for testing and is considered deprecated. Jetty 8 is used as default for testing.
+* ActiveMQ and Camel plugin now hides the choose sub tab in the send message dialog; as that is only in use when using fabric8 v1
+* OSGi plugin now shows feature and server details for Karaf 3.x onwards
+* Other [minor isseues fixed](https://github.com/hawtio/hawtio/issues?q=milestone%3A1.4.50+is%3Aclosed)
+
+#### 1.4.49
+
+* Running hawtio on Apache Tomcat with users defined in `tomcat-users.xml` now supports specifying the password hashed algorithm to use.
+* Upgrade to Camel 2.15.1
+* Camel plugin: Clicking on a EIP/node in the Route Diagram redirects to the selected EIP properties page
+* Camel plugin: Fixed inflight page didnt clear data if no longer any exchanges inflight
+* Camel plugin: Fixed endpoint properties to show option names correctly when the option has a label associated
+* Various fixes and improvements for Fabric 1.x plugin
+* Fixed Karaf terminal to avoid potentially sending duplicat keys
+* Other bug fixes as part of hardening hawtio for JBoss Fuse 6.2 product
+
 #### 1.4.47 ... 1.4.48
 
 * Update ng-grid to version 2.0.14

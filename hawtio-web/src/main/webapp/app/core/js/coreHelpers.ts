@@ -363,6 +363,7 @@ module Core {
               userDetails.password = null;
               userDetails.loginDetails = null;
               userDetails.rememberMe = false;
+              userDetails.remoteJolokiaUserDetails = null;
               delete localStorage['userDetails'];
               if (successCB && angular.isFunction(successCB)) {
                 successCB();
@@ -387,6 +388,7 @@ module Core {
               userDetails.password = null;
               userDetails.loginDetails = null;
               userDetails.rememberMe = false;
+              userDetails.remoteJolokiaUserDetails = null;
               delete localStorage['userDetails'];
               // TODO, more feedback
               switch (xhr.status) {
@@ -451,10 +453,12 @@ module Core {
   export function hashToString(hash) {
     var keyValuePairs:string[] = [];
     angular.forEach(hash, function (value, key) {
-      keyValuePairs.push(key + "=" + value);
+      // some values (like camel ObjectNames for endpoints) may contain '?' and '='
+      // let's encode it here as URI component, not at the end as URI
+      keyValuePairs.push(key + "=" + encodeURIComponent(value));
     });
     var params = keyValuePairs.join("&");
-    return encodeURI(params);
+    return params;
   }
 
   /**
@@ -1209,6 +1213,9 @@ module Core {
       parts = url.split(host);
     }
 
+    // make sure we use port as a number
+    var portNum = Core.parseIntValue(port);
+
     var path = parts[1];
     if (path && path.startsWith('/')) {
       path = path.slice(1, path.length);
@@ -1219,7 +1226,7 @@ module Core {
     return {
       scheme: scheme,
       host: host,
-      port: port,
+      port: portNum,
       path: path
     }
   }
