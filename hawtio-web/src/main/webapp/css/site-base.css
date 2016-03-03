@@ -892,6 +892,7 @@ table.dataTable tbody tr td {
 }
 
 .wiki-fixed {
+  visibility: hidden; /* it'll be made visible by wikiFixed directive */
   margin-top: 45px;
 }
 
@@ -1678,6 +1679,11 @@ td.adding {
   width: 160px;
 }
 
+.child-container {
+  margin-left: 2em;
+  transition: none;
+}
+
 .login-wrapper {
   position: absolute;
   left: 0;
@@ -2146,6 +2152,7 @@ dd.file-list {
 
 .active-profile-list .expandable {
   padding: 0;
+  cursor: pointer;
 }
 
 .active-profile-titles.section-header {
@@ -2178,7 +2185,7 @@ dd.file-list {
   background: inherit;
 }
 
-.active-profile-list .expandable .expandable-body ul li .child-container {
+.active-profile-list .expandable .expandable-body ul li {
   margin-left: 0;
 }
 
@@ -2231,7 +2238,6 @@ dd.file-list {
   overflow: hidden;
   text-overflow: ellipsis;
   right: 95px;
-  cursor: pointer;
 }
 
 .active-profile-icon {
@@ -3268,7 +3274,7 @@ fs-donut svg g text.units {
   width: 300px;
   height: 300px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .health-details-wrap a {
@@ -4252,6 +4258,9 @@ img.nodeIcon:hover {
   cursor: pointer;
 }
 
+ul.dynatree-container span.cant-invoke a {
+  color: red;
+}
 .operation-row.cant-invoke {
   cursor: not-allowed;
 }

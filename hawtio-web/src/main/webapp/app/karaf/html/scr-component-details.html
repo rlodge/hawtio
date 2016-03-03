@@ -6,6 +6,7 @@
                 <div class="btn-group">
                   <button class="btn" 
                           ng-click="activate()"
+                          ng-show="canActivate()"
                           hawtio-show
                           object-name="{{scrMBean}}"
                           method-name="activateComponent">
@@ -13,6 +14,7 @@
                   </button>
                   <button class="btn" 
                           ng-click="deactivate()"
+                          ng-show="!canActivate()"
                           hawtio-show
                           object-name="{{scrMBean}}"
                           method-name="deactiveateComponent">
@@ -43,16 +45,13 @@
                 <div class="accordion" id="accordionProperties">
                     <div class="accordion-group">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordionProperties"
-                               href="#collapseProperties">
-                                Properties
-                            </a>
+                            <span style="cursor:text; padding: 8px 15px;">Properties</span>
                         </div>
                         <div id="collapseProperties" class="accordion-body collapse in">
                             <table class="accordion-inner">
                                 <tr ng-repeat="(key, value) in row.Properties">
                                     <td valign="top">{{key}}</td>
-                                    <td>{{value.Value}}</td>
+                                    <td><span ng-repeat="v in value">{{v.Value}}</span></td>
                                 </tr>
                             </table>
                         </div>
@@ -67,10 +66,7 @@
                 <div class="accordion" id="accordionReferences">
                     <div class="accordion-group">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordionReferences"
-                               href="#collapseReferences">
-                                References
-                            </a>
+                            <span style="cursor:text; padding: 8px 15px;">References</span>
                         </div>
                         <div id="collapseReferences" class="accordion-body collapse in">
                             <table class="accordion-inner">
@@ -84,7 +80,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="(key, value) in row.References">
+                                    <tr ng-repeat="(key, value) in row.References.values">
                                         <td valign="left" class="less-big">{{value.Name}}</td>
                                         <td valign="left" class="less-big">{{value.Availability}}</td>
                                         <td valign="left" class="less-big">{{value.Cardinality}}</td>

@@ -4,6 +4,8 @@ module Camel {
   _module.controller("Camel.PropertiesEndpointController", ["$scope", "workspace", "localStorage", "jolokia", ($scope, workspace:Workspace, localStorage:WindowLocalStorage, jolokia) => {
     var log:Logging.Logger = Logger.get("Camel");
 
+    $scope.workspace = workspace;
+
     $scope.hideHelp = Camel.hideOptionDocumentation(localStorage);
     $scope.hideUnused = Camel.hideOptionUnusedValue(localStorage);
     $scope.hideDefault = Camel.hideOptionDefaultValue(localStorage);
@@ -132,6 +134,12 @@ module Camel {
 
         // grab all values form the model as they are the current data we need to add to node data (not all properties has a value)
         $scope.nodeData = {};
+        var tabs = {};
+        tabs = Camel.buildTabsFromProperties(tabs, $scope.model.properties);
+        $scope.model.tabs = tabs;
+
+        // remove componentProperties which is a mistake to be in
+        delete $scope.model['componentProperties'];
 
         angular.forEach($scope.model.properties, function (property, key) {
           // does it have a value or fallback to use a default value
@@ -139,6 +147,7 @@ module Camel {
           if (angular.isDefined(value) && value !== null) {
             $scope.nodeData[key] = value;
           }
+
           // remove label as that causes the UI to render the label instead of the key as title
           // we should later group the table into labels (eg consumer vs producer)
           delete property["label"];

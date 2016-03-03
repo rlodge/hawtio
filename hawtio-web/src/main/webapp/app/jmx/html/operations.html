@@ -35,7 +35,7 @@
             </div>
           </div>
           <div class="row-fluid">
-            <div hawtio-editor="operationResult" mode="mode"></div>
+            <div hawtio-editor="operationResult" mode="html" read-only="nocursor"></div>
           </div>
         </div>
         <div ng-show="operationResult==''">
@@ -90,7 +90,7 @@
         ng-show="doFilter(operation)"
         ng-click="invokeOp(operation)"
         ng-class="getClass(operation)"
-        title="Click to invoke {{operation.name}}"
+        title="{{operation.desc}}"
         data-placement="bottom">
       <i class="icon-cog"
          ng-class="getClass(operation)"></i>

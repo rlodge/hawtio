@@ -4,6 +4,8 @@ module Camel {
 
     var log:Logging.Logger = Logger.get("CamelTracer");
 
+    $scope.workspace = workspace;
+
     $scope.tracing = false;
     $scope.messages = [];
     $scope.graphView = null;
@@ -37,6 +39,9 @@ module Camel {
       log.debug("Clear messages")
       tracerStatus.messages = [];
       $scope.messages = [];
+      if ($scope.row) {
+        $scope.messageDialog.close();
+      }
       Core.$apply($scope);
     };
 

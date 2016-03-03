@@ -8,15 +8,15 @@
         <div class="btn-group" style="padding-left: 10px">
           <button class="btn"
                   ng-class="groupByClass('profileIds', groupBy)"
-                  ng-click="groupBy='profileIds'">Profiles
+                  ng-click="groupBy='profileIds';filterBoxText=filterProfilesText">Profiles
           </button>
           <button class="btn"
                   ng-class="groupByClass('location', groupBy)"
-                  ng-click="groupBy='location'">Location
+                  ng-click="groupBy='location';filterBoxText=filterLocationsText">Location
           </button>
           <button class="btn"
                   ng-class="groupByClass('none', groupBy)"
-                  ng-click="groupBy='none'">Containers
+                  ng-click="groupBy='none';filterBoxText=filterContainersText">Containers
           </button>
         </div>
         <span class="badge badge-success mouse-pointer"
@@ -54,7 +54,7 @@
                desc
                exclude='{{getVersionsToExclude()}}'></span>
         </span>
-        <a class="btn" ng-click="startSelectedContainers()" ng-show="anySelectionStartable()"
+        <a class="btn" ng-click="startSelectedContainers()" ng-show="groupBy!='profileIds' && allSelectionsStartable()"
            title="Start containers"
            hawtio-show
            object-name="{{managerMBean}}"
@@ -62,7 +62,7 @@
           <i class="icon-play-circle clickable"></i>
           Start
         </a>
-        <a class="btn" ng-click="stopSelectedContainers()" ng-show="anySelectionStoppable()"
+        <a class="btn" ng-click="stopSelectedContainers()" ng-show="groupBy!='profileIds' && anySelectionStoppable()"
            title="Stop containers"
            hawtio-show
            object-name="{{managerMBean}}"
@@ -72,7 +72,7 @@
         </a>
         <a class="btn"
            ng-click="deleteContainer()"
-           ng-show="mayDelete()"
+           ng-show="groupBy!='profileIds' && mayDelete()"
            title="Delete container"
            hawtio-show
            object-name="{{managerMBean}}"
@@ -84,7 +84,7 @@
           <i class="icon-plus"></i> Create
         </a>
         <hawtio-filter ng-model="filter"
-                       placeholder="Filter Containers..."
+                       placeholder="{{filterBoxText}}"
                        save-as="fabric-container-view-text-filter"></hawtio-filter>
       </div>
     </div>
@@ -114,7 +114,7 @@
         <strong class="mouse-pointer" ng-click="showContainersFor(locationId)">{{locationId}}</strong>
         <div>
           <div class="column-box-square mouse-pointer" 
-            ng-repeat="container in location.containers | orderBy:['!alive', 'provisionResult', 'id']"
+            ng-repeat="container in location.containers | orderBy:['id', '!alive', 'provisionResult']"
             ng-show="filterContainer(container)"
             ng-class="getSelectedClass(container)"
             ng-click="select(containers, container, $event)">

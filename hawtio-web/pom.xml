@@ -83,14 +83,14 @@
 
     <dependency>
       <groupId>io.hawt</groupId>
-      <artifactId>hawtio-kubernetes</artifactId>
+      <artifactId>hawtio-maven-indexer</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>io.hawt</groupId>
-      <artifactId>hawtio-maven-indexer</artifactId>
+      <artifactId>hawtio-insight-log</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
@@ -248,9 +248,10 @@
       <version>${camel-version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- use jetty 8 as hawtio project is setup for that version -->
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-jetty</artifactId>
+      <artifactId>camel-jetty8</artifactId>
       <version>${camel-version}</version>
       <scope>test</scope>
     </dependency>
@@ -320,12 +321,6 @@
       <version>${spring-version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.fabric8.insight</groupId>
-      <artifactId>insight-log4j</artifactId>
-      <version>${insight-log4j-version}</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
@@ -334,7 +329,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.gitective</groupId>
+      <groupId>io.fabric8</groupId>
       <artifactId>gitective-core</artifactId>
       <version>${gitective-version}</version>
       <scope>test</scope>
@@ -633,13 +628,13 @@
               !org.apache.avalon*,
               !org.apache.log*,
               !javax.persistence,
-
               !com.jcraft.jzlib,
               !keypairgen,
               !signature,
               !userauth,
               !com.ibm.uvm.tools*,!com.sun.jdmk.comm*,!javax.jmdns*,!javax.jms*,!javax.portlet*,
               !org.apache.commons.io*,
+              org.apache.karaf.jaas.boot.principal;resolution:=optional,
               *
             </Import-Package>
             <Private-Package>
@@ -1075,77 +1070,6 @@
     </profile>
 
     <profile>
-      <id>apollo</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-broker</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-stomp</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-openwire</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-mqtt</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-amqp</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-leveldb</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-jmx</artifactId>
-          <version>${apollo-version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>apollo-web</artifactId>
-          <classifier>classes</classifier>
-          <version>${apollo-version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>org.fusesource.scalate</groupId>
-              <artifactId>scalate-core_2.10</artifactId>
-            </exclusion>
-          </exclusions>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.scala-lang</groupId>
-          <artifactId>scala-library</artifactId>
-          <scope>test</scope>
-          <version>${scala-version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
       <id>release</id>
       <properties>
         <chrome-version>${project.version}</chrome-version>
@@ -1249,81 +1173,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-
-    <profile>
-      <id>kube</id>
-
-      <properties>
-        <fabric8.release.version>2.0.22</fabric8.release.version>
-        <fabric8.v2.version>${fabric8.release.version}</fabric8.v2.version>
-<!--
-        <fabric8.v2.version>2.1-SNAPSHOT</fabric8.v2.version>
--->
-
-        <hawtio-config-importURLs>mvn:io.fabric8.quickstarts/fabric8-quickstarts-parent/${fabric8.release.version}/zip/app,mvn:io.fabric8.jube.images.fabric8/apps/${fabric8.release.version}/zip/app</hawtio-config-importURLs>
-        <hawtio-config-cloneOnStartup>false</hawtio-config-cloneOnStartup>
-
-        <!--
-        this points to the local build of fabric8 so that you can modify the wiki to add/remove apps
-        without messing with the clean curated wiki generated by the fabric8 build ;)
-        -->
-<!--
-        <hawtio-config-dir>../../fabric8/wiki/target/hawtioConfig</hawtio-config-dir>
--->
-        <hawtio-config-dir>${basedir}/target/kubeWikiConfig</hawtio-config-dir>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>io.fabric8</groupId>
-          <artifactId>kubernetes-api</artifactId>
-          <version>${fabric8.v2.version}</version>
-          <scope>test</scope>
-          <exclusions>
-            <exclusion>
-              <groupId>org.apache.karaf.features</groupId>
-              <artifactId>org.apache.karaf.features.core</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>org.osgi</groupId>
-              <artifactId>org.osgi.core</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>io.fabric8</groupId>
-          <artifactId>kubernetes-mbeans</artifactId>
-          <version>${fabric8.v2.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>io.fabric8</groupId>
-          <artifactId>kubernetes-template</artifactId>
-          <version>${fabric8.v2.version}</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-
-
-<!--
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-clean-plugin</artifactId>
-            <version>2.5</version>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>${basedir}/hawtio-config</directory>
-                  <followSymlinks>false</followSymlinks>
-                </fileset>
-              </filesets>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
--->
     </profile>
 
   </profiles>

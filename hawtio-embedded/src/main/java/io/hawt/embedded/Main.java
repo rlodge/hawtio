@@ -164,7 +164,7 @@ public class Main {
                     WebAppContext plugin = new WebAppContext();
                     plugin.setServer(handlers.getServer());
                     plugin.setContextPath(contextPath);
-                    plugin.setWar("file://" + war.getAbsolutePath());
+                    plugin.setWar(war.getAbsolutePath());
                     // plugin.setParentLoaderPriority(true);
                     plugin.setLogUrlOnStart(true);
 
@@ -275,6 +275,14 @@ public class Main {
 
     public void setJoinServerThread(boolean joinServerThread) {
         options.setJointServerThread(joinServerThread);
+    }
+
+    public boolean isOpenUrl() {
+        return options.isOpenUrl();
+    }
+
+    public void setOpenUrl(boolean openUrl) {
+        options.setOpenUrl(openUrl);
     }
 
     public boolean isHelp() {

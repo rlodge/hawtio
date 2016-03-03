@@ -4,7 +4,6 @@
 /// <reference path="../../git/js/git.ts"/>
 /// <reference path="../../fabric/js/fabricHelpers.ts"/>
 /// <reference path="../../helpers/js/urlHelpers.ts"/>
-/// <reference path="../../docker-registry/js/dockerRegistryHelpers.ts"/>
 /**
  * @module Wiki
  */
@@ -70,93 +69,13 @@ module Wiki {
       invalid: defaultLowerCaseFileNamePatternInvalid
     },
     {
-      label: "App",
-      tooltip: "Creates a new App folder used to configure and run containers",
-      addClass: "icon-cog green",
-      exemplar: 'myapp',
-      regex: defaultFileNamePattern,
-      invalid: defaultFileNamePatternInvalid,
-      extension: '',
-      generated: {
-        mbean: ['io.fabric8', { type: 'KubernetesTemplateManager' }],
-        init: (workspace, $scope) => {
-
-        },
-        generate: (options:GenerateOptions) => {
-          log.debug("Got options: ", options);
-          options.form.name = options.name;
-          options.form.path = options.parentId;
-          options.form.branch = options.branch;
-          var json = angular.toJson(options.form);
-          var jolokia = <Jolokia.IJolokia> Core.injector.get("jolokia");
-          jolokia.request({
-            type: 'exec',
-            mbean: 'io.fabric8:type=KubernetesTemplateManager',
-            operation: 'createAppByJson',
-            arguments: [json]
-          }, onSuccess((response) => { 
-            log.debug("Generated app, response: ", response);
-            options.success(undefined); 
-          }, {
-            error: (response) => { options.error(response.error); }
-          }));
-        },
-        form: (workspace, $scope) => {
-          if (!$scope.doDockerRegistryCompletion) {
-            $scope.fetchDockerRepositories = () => {
-              return DockerRegistry.completeDockerRegistry();
-            }
-          }
-          return {
-            summaryMarkdown: 'Add app summary here',
-            replicaCount: 1
-          };
-        },
-        schema: {
-          description: 'App settings',
-          type: 'java.lang.String',
-          properties: {
-            'dockerImage': {
-              'description': 'Docker Image',
-              'type': 'java.lang.String',
-              'input-attributes': { 
-                'required': '', 
-                'class': 'input-xlarge',
-                'typeahead': 'repo for repo in fetchDockerRepositories() | filter:$viewValue',
-                'typeahead-wait-ms': '200'
-              }
-            },
-            'summaryMarkdown': {
-              'description': 'Short Description',
-              'type': 'java.lang.String',
-              'input-attributes': { 'class': 'input-xlarge' }
-            },
-            'replicaCount': {
-              'description': 'Replica Count',
-              'type': 'java.lang.Integer',
-              'input-attributes': {
-                min: '0'
-              }
-            },
-            'labels': {
-              'description': 'Labels',
-              'type': 'map',
-              'items': {
-                'type': 'string'
-              }
-            }
-          }
-        }
-      }
-    },
-    {
       label: "Fabric8 Profile",
       tooltip: "Create a new empty fabric profile. Using a hyphen ('-') will create a folder heirarchy, for example 'my-awesome-profile' will be available via the path 'my/awesome/profile'.",
       profile: true,
       addClass: "icon-book green",
       exemplar: "user-profile",
-      regex: defaultLowerCaseFileNamePattern,
-      invalid: defaultLowerCaseFileNamePatternInvalid,
+      regex: defaultFileNamePattern,
+      invalid: defaultFileNamePatternInvalid,
       fabricOnly: true
     },
     {
@@ -285,7 +204,7 @@ module Wiki {
     {
       label: "Text Document",
       tooltip: "A plain text file",
-      exemplar: "document.text",
+      exemplar: "document.txt",
       regex: defaultFileNamePattern,
       invalid: defaultFileNamePatternInvalid,
       extension: ".txt"
@@ -628,6 +547,15 @@ module Wiki {
     return UrlHelpers.join("git/" + branch, path);
   }
 
+  /**
+   * Return a relative URL without "git" prepended
+   */
+  export function relativeURL(branch: string, path: string) {
+    branch = branch || "master";
+    path = path || "/";
+    return UrlHelpers.join(branch, path);
+  }
+
 
   /**
    * Takes a row containing the entity object; or can take the entity directly.
@@ -673,16 +601,13 @@ module Wiki {
         log.debug("file " + name + " has namespaces " + xmlNamespaces);
       }
     }
-    if (iconUrl) {
+    if (iconUrl || (extension && (['png', 'svg', 'jpg', 'gif'].indexOf(extension) >= 0))) {
       css = null;
-      icon = UrlHelpers.join("git", iconUrl);
-      var connectionName = Core.getConnectionNameParameter(location.search);
-      if (connectionName) {
-        var connectionOptions = Core.getConnectOptions(connectionName);
-        if (connectionOptions) {
-          connectionOptions.path = Core.url('/' + icon);
-          icon = <string>Core.createServerConnectionUrl(connectionOptions);
-        }
+      if (iconUrl) {
+          icon = Fabric.toIconURL(null, iconUrl);;
+      } else {
+          icon = Wiki.relativeURL(branch, path);
+          icon = Fabric.toIconURL(null, icon);
       }
     }
     if (!icon) {
@@ -697,21 +622,6 @@ module Wiki {
         }
       } else {
         switch (extension) {
-          case 'png':
-          case 'svg':
-          case 'jpg':
-          case 'gif':
-            css = null;
-            icon = Wiki.gitRelativeURL(branch, path);
-            var connectionName = Core.getConnectionNameParameter(location.search);
-            if (connectionName) {
-              var connectionOptions = Core.getConnectOptions(connectionName);
-              if (connectionOptions) {
-                connectionOptions.path = Core.url('/' + icon);
-                icon = <string>Core.createServerConnectionUrl(connectionOptions);
-              }
-            }
-            break;
           case 'json':
           case 'xml':
             css = "icon-file-text";

@@ -15,7 +15,7 @@
 
     though you get this enabled by default if you use hawtio-default.war
    -->
-  <bean id="logQuery" class="io.fabric8.insight.log.log4j.Log4jLogQuery" lazy-init="false" scope="singleton"
+  <bean id="logQuery" class="io.hawt.log.log4j.Log4jLogQuery" lazy-init="false" scope="singleton"
         init-method="start" destroy-method="stop"/>
 
   <!-- This creates an embedded ActiveMQ Broker -->
@@ -80,6 +80,10 @@
   <!-- use camel-metrics route policy to gather metrics for all routes -->
   <bean id="metricsRoutePolicyFactory" class="org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory"/>
 
+  <!-- TODO: require Camel 2.17 onwards -->
+  <!-- use camel-metrics message history to gather message history statistics for all routes -->
+  <!--<bean id="metricsMessageHistoryFactory" class="org.apache.camel.component.metrics.messagehistory.MetricsMessageHistoryFactory"/>-->
+
   <!-- Here is a sample which processes the input files
          (leaving them in place - see the 'noop' flag), and
          sends them on a JMS queue. This queue is watched by
@@ -127,6 +131,9 @@
       </transform>
       <delay><constant>1500</constant></delay>
       <setBody><simple>A Delayed ${body}</simple></setBody>
+      <marshal>
+        <string charset="iso-8859-1"/>
+      </marshal>
       <setHeader headerName="myHeader">
         <constant>This is a new header value</constant>
       </setHeader>

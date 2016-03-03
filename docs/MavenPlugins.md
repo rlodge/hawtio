@@ -20,6 +20,10 @@
     <td>This goal runs the Maven project as a Spring application, by loading Spring XML configurations files from the classpath or file system.</td>
   </tr>    
   <tr>
+    <td>spring-boot</td>
+    <td>This goal runs the Maven project as a Spring Boot application, by executing the configured Spring Boot mainClass.</td>
+  </tr>    
+  <tr>
     <td>camel</td>
     <td>This goal is an extension to the <a href="http://camel.apache.org/camel-maven-plugin.html">Apache Camel Maven Plugins</a>, allowing to run the Camel Maven project and have hawtio embedded. This allows users to gain visibility into the running JVM, and see what happens, such as live visualization of the Camel routes, and being able to debug and profile routes, and much more, offered by the <a href="http://hawt.io/plugins/camel/">Camel plugin</a>.</td>
   </tr>
@@ -28,8 +32,12 @@
     <td>The same as the camel goal but needed when using OSGi Blueprint Camel applications.</td>
   </tr>         
   <tr>
+    <td>camel-cdi</td>
+    <td>The same as the camel goal but needed when using CDI Camel applications.</td>
+  </tr>         
+  <tr>
     <td>test</td>
-    <td>This goal run the unit tests of the Maven project. Can be used together with the <a href"http://hawt.io/plugins/junit.html">JUnit</a> plugin to run unit tests from within hawtio console as well. This plugin is currently <strong>Work in progress</strong>, and subject for changes.</td>
+    <td>This goal run the unit tests of the Maven project. Can be used together with the <a href"http://hawt.io/plugins/junit.html">JUnit</a> plugin to run unit tests from within hawtio console as well.</td>
   </tr>         
 </table>
 
@@ -80,13 +88,23 @@ Currently all of the **hawtio** Maven Plugins provides the following common opti
   </tr>  
   <tr>
     <td>port</td>
-    <td>8282</td>
-    <td>The port number to use for the embedded hawtio web console.</td>
+    <td>8080</td>
+    <td>The port number to use for the embedded hawtio web console. Notice the spring-boot goal uses port 9191 as default.</td>
   </tr>  
   <tr>
     <td>mainClass</td>
     <td></td>
     <td>The fully qualified name of the main class to executed to bootstrap the Maven project. This option is required, and must be a public static void main Java class.</td>
+  </tr>  
+  <tr>
+    <td>openWebConsole</td>
+    <td>true</td>
+    <td>Wheter to automatic open the hawtio web console after 3 number of seconds</td>
+  </tr>  
+  <tr>
+    <td>openWebConsoleDelay</td>
+    <td>3</td>
+    <td>Number of seconds to wait before opening the web console</td>
   </tr>  
   <tr>
     <td>arguments</td>
@@ -123,6 +141,10 @@ The spring goal extends the run goal and provides the following additional optio
   </tr>     
 </table>
 
+
+### spring-boot Maven Goal configuration
+
+The spring-boot goal has no additional options.
 
 ### camel Maven Goal configuration
 
@@ -180,6 +202,11 @@ The camel goal extends the run goal and provides the following additional option
   </tr>     
 </table>
 
+### camel-cdi Maven Goal configuration
+
+The camel-cdi goal has no additional options.
+
+
 ### test Maven Goal configuration
 
 The test **hawtio** Maven Plugins provides the following common options:
@@ -216,7 +243,7 @@ In the Maven pom.xml file, the **hawtio** plugin is configured by adding the fol
     <plugin>
       <groupId>io.hawt</groupId>
       <artifactId>hawtio-maven-plugin</artifactId>
-      <version>1.4.51</version>
+      <version>1.4.61</version>
       <configuration>
         <!-- configuration options goes here -->
       </configuration>
@@ -263,9 +290,9 @@ To run the same example with **hawtio** embedded as a web console, you simply do
     cd examples
     cd camel-example-console
     mvn compile
-    mvn io.hawt:hawtio-maven-plugin:1.4.51:camel
+    mvn io.hawt:hawtio-maven-plugin:1.4.61:camel
 
-Where 1.4.51 is the **hawtio** version to use.
+Where 1.4.61 is the **hawtio** version to use.
 
 ### Adding hawtio plugin to the Apache Camel examples
 
@@ -276,7 +303,7 @@ In the &lt;build&gt;&lt;plugin&gt;section add the following xml code:
     <plugin>
       <groupId>io.hawt</groupId>
       <artifactId>hawtio-maven-plugin</artifactId>
-      <version>1.4.51</version>
+      <version>1.4.61</version>
     </plugin>
 
 And you can run the console example simply by typing

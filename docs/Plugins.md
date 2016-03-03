@@ -4,7 +4,7 @@ For more details see the [Configuration Guide](http://hawt.io/configuration/inde
 
 ## Included Plugins
 
-The following plugins are all included by default in the [hawtio-web.war](https://oss.sonatype.org/content/repositories/public/io/hawt/hawtio-web/1.4.50/hawtio-web-1.4.50.war) distro. You can see the [source for the all default plugins here](https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app).
+The following plugins are all included by default in the [hawtio-web.war](https://oss.sonatype.org/content/repositories/public/io/hawt/hawtio-web/1.4.61/hawtio-web-1.4.61.war) distro. You can see the [source for the all default plugins here](https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app).
 
 
 <table class="table">
@@ -22,11 +22,6 @@ The following plugins are all included by default in the [hawtio-web.war](https:
     <td><a href="http://hawt.io/plugins/activemq/">activemq</a></td>
     <td>Adds support for <a href="http://activemq.apache.org/">Apache ActiveMQ</a>. Lets you browse broker statistics, create queues/topcs, browse queues, send messages and visualise subscription and network information</td>
     <td><a href="https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app/activemq">activemq</a></td>
-  </tr>
-  <tr>
-    <td><a href="http://hawt.io/plugins/apollo/">apollo</a></td>
-    <td>Adds support for <a href="http://activemq.apache.org/apollo/">Apache ActiveMQ Apollo</a>. Lets you browse broker statistics, create queues/topcs, browse queues, send messages and visualise subscription and network information</td>
-    <td><a href="https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app/apollo">apollo</a></td>
   </tr>
   <tr>
     <td><a href="http://hawt.io/plugins/camel/">camel</a></td>
@@ -107,7 +102,7 @@ The following plugins are all included by default in the [hawtio-web.war](https:
   </tr>
   <tr>
     <td><a href="http://hawt.io/plugins/junit/">junit</a></td>
-    <td>Adds support for running JUnit tests from wihtin hawtio.</td>
+    <td>Adds support for running JUnit tests from within hawtio.</td>
     <td><a href="https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app/junit">junit</a></td>
   </tr>
   <tr>
@@ -127,7 +122,7 @@ The following plugins are all included by default in the [hawtio-web.war](https:
   </tr>
   <tr>
     <td><a href="http://hawt.io/plugins/maven/">maven</a></td>
-    <td>Lets you query maven repositories for artefacts; then see the available versions, javadoc and source.</td>
+    <td>Lets you query maven repositories for artifacts; then see the available versions, javadoc and source.</td>
     <td><a href="https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app/maven">maven</a></td>
   </tr>
   <tr>
@@ -149,6 +144,11 @@ The following plugins are all included by default in the [hawtio-web.war](https:
     <td><a href="http://hawt.io/plugins/source/">source</a></td>
     <td>Used by the <a href="http://hawt.io/plugins/logs/">log plugin</a> to view the source code of any file in a maven source artefact using the maven coordinates, class name / file name and line number.</td>
     <td><a href="https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app/source">source</a></td>
+  </tr>
+  <tr>
+    <td><a href="http://hawt.io/plugins/springBoot/">springBoot</a></td>
+    <td>Spring Boot plugin to show information about the Spring Boot application.</td>
+    <td><a href="https://github.com/hawtio/hawtio/tree/master/hawtio-web/src/main/webapp/app/springBoot">source</a></td>
   </tr>
   <tr>
     <td><a href="http://hawt.io/plugins/threads/">threads</a></td>

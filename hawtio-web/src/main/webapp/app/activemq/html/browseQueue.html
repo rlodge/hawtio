@@ -16,7 +16,7 @@
            <i class="icon-share-alt"></i> Resend
           </button>
 
-          <button class="btn" ng-disabled="!gridOptions.selectedItems.length" ng-click="moveDialog = true"
+          <button class="btn" ng-disabled="!gridOptions.selectedItems.length || queueNames.length === 0" ng-click="moveDialog = true"
                   title="Move the selected messages to another destination" data-placement="bottom">
             <i class="icon-share-alt"></i> Move
           </button>
@@ -38,6 +38,11 @@
     <div class="gridStyle" ng-grid="gridOptions"></div>
   </div>
 
+  <!-- include the message body hidden so we can use it for the copy button -->
+  <div ng-show="false">
+    <p id="message_body">{{row.bodyText}}</p>
+  </div>
+
   <div hawtio-slideout="showMessageDetails" title="{{row.JMSMessageID}}">
     <div class="dialog-body">
 
@@ -53,6 +58,13 @@
             <button class="btn" ng-disabled="!gridOptions.selectedItems.length" ng-click="moveDialog = true"
                     title="Move the selected messages to another destination" data-placement="bottom">
               <i class="icon-share-alt"></i> Move
+            </button>
+            
+            <button class="btn"
+                    zero-clipboard
+                    data-clipboard-target="message_body"
+                    title="Click to copy the message body to the clipboard">
+              <i class="icon-copy"></i> Copy
             </button>
 
             <button class="btn btn-danger" ng-disabled="!gridOptions.selectedItems.length"
@@ -82,14 +94,7 @@
                 <th>Value</th>
               </tr>
               </thead>
-              <tbody ng-bind-html-unsafe="row.headerHtml">
-              </tbody>
-              <!--
-                            <tr ng-repeat="(key, value) in row.headers">
-                              <td class="property-name">{{key}}</td>
-                              <td class="property-value">{{value}}</td>
-                            </tr>
-              -->
+              <tbody ng-bind-html-unsafe="row.headerHtml"></tbody>
             </table>
           </div>
         </div>
@@ -123,8 +128,8 @@
       <p>Move
         <ng-pluralize count="gridOptions.selectedItems.length"
                       when="{'1': 'message', 'other': '{} messages'}"></ng-pluralize>
-        to: <input type="text" ng-model="queueName" placeholder="Queue name"
-                   typeahead="title.unescapeHTML() for title in queueNames($viewValue) | filter:$viewValue" typeahead-editable='true'></p>
+        to: <select ng-model="queueName" ng-options="qn for qn in queueNames"></select>
+      </p>
       <p>
         You cannot undo this operation.<br>
         Though after the move you can always move the

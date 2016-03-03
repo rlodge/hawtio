@@ -1,6 +1,9 @@
 /// <reference path="camelPlugin.ts"/>
 module Camel {
   _module.controller("Camel.DebugRouteController", ["$scope", "$element", "workspace", "jolokia", "localStorage", ($scope, $element, workspace:Workspace, jolokia, localStorage) => {
+
+    $scope.workspace = workspace;
+
     // ignore the cached stuff in camel.ts as it seems to bork the node ids for some reason...
     $scope.ignoreRouteXmlNode = true;
 
@@ -301,8 +304,8 @@ module Camel {
       return svg.selectAll("g .node");
     }
 
-    var breakpointImage = Core.url("/app/camel/doc/img/debug/breakpoint.gif");
-    var suspendedBreakpointImage = Core.url("/app/camel/doc/img/debug/breakpoint-suspended.gif");
+    var breakpointImage = Core.url("/app/camel/img/breakpoint.gif");
+    var suspendedBreakpointImage = Core.url("/app/camel/img/breakpoint-suspended.gif");
 
     function updateBreakpointIcons(nodes = getDiagramNodes()) {
       nodes.each(function (object) {

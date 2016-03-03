@@ -4,9 +4,14 @@
 /// <reference path="./osgiPlugin.ts"/>
 module Osgi {
 
-  export var ServiceController = _module.controller("Osgi.ServiceController", ["$scope", "$filter", "workspace", "$templateCache", "$compile", ($scope, $filter:ng.IFilterService, workspace:Workspace, $templateCache:ng.ITemplateCacheService, $compile:ng.IAttributes) => {
+  export var ServiceController = _module.controller("Osgi.ServiceController", ["$scope", "$filter", "$element", "workspace", "$templateCache", "$compile", ($scope, $filter:ng.IFilterService, $element, workspace:Workspace, $templateCache:ng.ITemplateCacheService, $compile:ng.IAttributes) => {
 
     var dateFilter = $filter('date');
+    var destroyed = false;
+
+    $element.on('$destroy', () => {
+      destroyed = true;
+    });
 
     $scope.widget = new DataTable.TableWidget($scope, $templateCache, $compile, [
       <DataTable.TableColumnConfig> {
@@ -15,7 +20,7 @@ module Osgi {
         "sDefaultContent": '<i class="icon-plus"></i>'
       },
       <DataTable.TableColumnConfig> { "mDataProp": "Identifier" },
-      <DataTable.TableColumnConfig> { "mDataProp": "BundleIdentifier" },
+      <DataTable.TableColumnConfig> { "mDataProp": "BundleIdentifier", "sType": "num-html" },
       <DataTable.TableColumnConfig> { "mDataProp": "objectClass" }
     ], {
       rowDetailTemplateId: 'osgiServiceTemplate',
@@ -63,8 +68,10 @@ module Osgi {
             s["UsingBundles"][key] = bundleMap[b];
           });
         });
-        $scope.widget.populateTable(services);
-        Core.$apply($scope);
+        if (!destroyed) {
+          $scope.widget.populateTable(services);
+          Core.$apply($scope);
+        }
       };
       workspace.jolokia.request({
             type: 'exec',

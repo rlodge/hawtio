@@ -71,7 +71,7 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.gitective</groupId>
+      <groupId>io.fabric8</groupId>
       <artifactId>gitective-core</artifactId>
       <version>${gitective-version}</version>
       <exclusions>
@@ -162,6 +162,20 @@
             <Implementation-Version>${project.version}</Implementation-Version>
           </instructions>
         </configuration>
+      </plugin>
+      <!-- Remove any signatures that made their way into the generated bundle -->
+      <plugin>
+        <groupId>org.commonjava.maven.plugins</groupId>
+        <artifactId>unsigner-maven-plugin</artifactId>
+        <version>${unsigner-maven-plugin-version}</version>
+        <executions>
+          <execution>
+            <id>unsign-jar</id>
+            <goals>
+              <goal>unsign</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

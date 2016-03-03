@@ -33,6 +33,7 @@ public class Options {
     private String extraClassPath;
     private boolean help;
     private boolean jointServerThread;
+    private boolean openUrl = true;
 
     private abstract class Option {
         private String abbreviation;
@@ -120,7 +121,7 @@ public class Options {
             }
         });
 
-        addOption(new ParameterOption("p", "plugins", "Directory to search for .war files to install as 3rd party plugins") {
+        addOption(new ParameterOption("pd", "pluginsDir", "Directory to search for .war files to install as 3rd party plugins") {
             protected void doProcess(String arg, String parameter, LinkedList<String> remainingArgs) {
                 plugins = parameter;
             }
@@ -150,6 +151,12 @@ public class Options {
         addOption(new ParameterOption("ecp", "extraClassPath", "Extra classpath") {
             protected void doProcess(String arg, String parameter, LinkedList<String> remainingArgs) {
                 extraClassPath = parameter;
+            }
+        });
+
+        addOption(new ParameterOption("ou", "openUrl", "Open the web console automatic in the web browser") {
+            protected void doProcess(String arg, String parameter, LinkedList<String> remainingArgs) {
+                openUrl = Boolean.valueOf(parameter);
             }
         });
 
@@ -190,6 +197,7 @@ public class Options {
         if (plugins != null) {
             sb.append("\n\tplugins=").append(plugins);
         }
+        sb.append("\n\topenUrl=").append(openUrl);
         sb.append("\n\tjointServerThread=").append(jointServerThread);
         sb.append("\n\thelp=").append(help);
         sb.append("]");
@@ -277,7 +285,16 @@ public class Options {
         this.jointServerThread = jointServerThread;
     }
 
+    public boolean isOpenUrl() {
+        return openUrl;
+    }
+
+    public void setOpenUrl(boolean openUrl) {
+        this.openUrl = openUrl;
+    }
+
     public boolean isHelp() {
         return help;
     }
+
 }

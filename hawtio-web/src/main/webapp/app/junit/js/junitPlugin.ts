@@ -22,7 +22,7 @@ module JUnit {
     };
   });
 
-  _module.run(["$location", "workspace", "viewRegistry", "layoutFull", "helpRegistry", ($location:ng.ILocationService, workspace:Workspace, viewRegistry, layoutFull, helpRegistry) => {
+  _module.run(["$location", "workspace", "jolokia", "viewRegistry", "layoutFull", "helpRegistry", ($location:ng.ILocationService, workspace:Workspace, jolokia, viewRegistry, layoutFull, helpRegistry) => {
 
     viewRegistry['junit'] = 'app/junit/html/layoutJUnitTree.html';
 

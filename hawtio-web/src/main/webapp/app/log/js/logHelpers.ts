@@ -1,6 +1,7 @@
 /**
  * @module Log
  */
+ /// <reference path="../../core/js/coreHelpers.ts"/>
 module Log {
 
   export var log:Logging.Logger = Logger.get("Logs");
@@ -18,19 +19,17 @@ module Log {
   }
 
   export function treeContainsLogQueryMBean(workspace) {
-    return workspace.treeContainsDomainAndProperties('io.fabric8.insight', {type: 'LogQuery'}) ||
-      workspace.treeContainsDomainAndProperties('org.fusesource.insight', {type: 'LogQuery'});
+    return workspace.treeContainsDomainAndProperties('hawtio', {type: 'LogQuery'}) || workspace.treeContainsDomainAndProperties('io.fabric8.insight', {type: 'LogQuery'});
   }
 
   export function isSelectionLogQueryMBean(workspace) {
-    return workspace.hasDomainAndProperties('io.fabric8.insight', {type: 'LogQuery'}) ||
-      workspace.hasDomainAndProperties('org.fusesource.insight', {type: 'LogQuery'});
+    return workspace.hasDomainAndProperties('hawtio', {type: 'LogQuery'}) || workspace.hasDomainAndProperties('io.fabric8.insight', {type: 'LogQuery'});
   }
 
   export function findLogQueryMBean(workspace) {
-    var node = workspace.findMBeanWithProperties('io.fabric8.insight', {type: 'LogQuery'});
+    var node = workspace.findMBeanWithProperties('hawtio', {type: 'LogQuery'});
     if (!node) {
-      node = workspace.findMBeanWithProperties('org.fusesource.insight', {type: 'LogQuery'});
+      node = workspace.findMBeanWithProperties('io.fabric8.insight', {type: 'LogQuery'});
     }
     return node ? node.objectName : null;
   }

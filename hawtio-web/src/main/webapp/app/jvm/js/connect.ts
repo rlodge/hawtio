@@ -102,14 +102,6 @@ module JVM {
         path: <Forms.FormElement> {
           type: "java.lang.String",
           tooltip: "The URL path used to connect to Jolokia on the remote server"
-        },
-        userName: <Forms.FormElement> {
-          type: "java.lang.String",
-          tooltip: "The user name to be used when connecting to Jolokia"
-        },
-        password: <Forms.FormElement> {
-          type: "password",
-          tooltip: "The password to be used when connecting to Jolokia"
         }
       }
     };
@@ -167,6 +159,21 @@ module JVM {
       angular.extend($scope.currentConfig, $scope.connectionConfigs[$scope.lastConnection]);
       Core.$apply($scope);
     };
+    
+	var autoconnect = $location.search();
+	if (typeof autoconnect != 'undefined' && typeof autoconnect.name != 'undefined') {	
+		var conOpts = Core.createConnectOptions({
+		        scheme: 'http',
+		        host: autoconnect.host,
+		        path: autoconnect.path,
+		        port: autoconnect.port,
+		        userName: autoconnect.userName,
+		        password: autoconnect.password,
+		        name: autoconnect.name
+		});			
+	    $scope.gotoServer(conOpts,null,false);	
+		window.close();
+	}
 
   }]);
 }

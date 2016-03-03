@@ -246,6 +246,7 @@ module Core {
     preferencesRegistry.addTab("Console Logging",
       "app/core/html/loggingPreferences.html");
     preferencesRegistry.addTab("Editor", "app/ui/html/editorPreferences.html");
+    preferencesRegistry.addTab("JMX Domains", "app/core/html/jmxPreferences.html");
     preferencesRegistry.addTab("Jolokia", "app/core/html/jolokiaPreferences.html");
     preferencesRegistry.addTab("Reset", "app/core/html/resetPreferences.html");
 
@@ -288,6 +289,64 @@ module Core {
         $route.reload();
       });
     }, 500);
+
+    setInterval(() => {
+      var cache = Core.pathGet($, ['cache']);
+      if (!cache) {
+        return;
+      }
+      var toPrune = [];
+      angular.forEach(cache, (value, key) => {
+        var data = Core.pathGet(value, ['data']);
+        var $scope = Core.pathGet(value, ['data', '$scope']);
+        var handle = Core.pathGet(value, ['handle']);
+        if (!$scope && handle && handle.elem && handle.elem !== document && !$.contains(document.documentElement, handle.elem)) {
+          Logger.get("jquery-cache-prune").debug("Cache item with handle that isn't in the document, key: ", key, "value: ", value, " element: ", handle.elem);
+          $(handle.elem).remove();
+        }
+
+        function checkParentDestroyed($scope) {
+          if ($scope.$parent) {
+            return checkParentDestroyed($scope.$parent);
+          }
+          return {
+            destroyed: $scope.$$destroyed,
+            '$scope': $scope
+          };
+        }
+        function destroyTree($scope) {
+          if ($scope.$parent) {
+            destroyTree($scope.$parent);
+            $scope.$parent = null;
+          }
+          if ($scope) {
+            try {
+              $scope.$destroy();
+            } catch (err) {
+              // ignored
+            }
+            $scope.$$destroyed = true;
+          }
+        }
+
+        if ($scope) {
+          var info = checkParentDestroyed($scope);
+          if (info.destroyed) {
+            Logger.get("jquery-cache-prune").debug("Parent of $scope in cache item destroyed: ", info.$scope);
+            destroyTree($scope);
+          }
+        }
+        if ($scope && $scope.$$destroyed) {
+          Logger.get("jquery-cache-prune").debug("Pruning cache item with destroyed scope: ", key, "value: ", value, " data: ", data, " $scope: ", $scope);
+          toPrune.push(key);
+          return;
+        }
+      });
+      angular.forEach(toPrune, (key) => {
+        delete cache[key];
+      }); 
+      Logger.get("jquery-cache-prune").debug("Number of cache items after pruning: ", _.keys(cache).length, " number of items removed: ", toPrune.length);
+    }, 10000);
   }]); // end _module.run
 } // end module Core
 

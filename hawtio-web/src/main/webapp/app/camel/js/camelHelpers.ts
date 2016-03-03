@@ -29,7 +29,7 @@ module Camel {
    */
   export function processRouteXml(workspace:Workspace, jolokia, folder, onRoute) {
     var selectedRouteId = getSelectedRouteId(workspace, folder);
-    var mbean = getSelectionCamelContextMBean(workspace);
+    var mbean = getExpandingFolderCamelContextMBean(workspace, folder) || getSelectionCamelContextMBean(workspace);
 
     function onRouteXml(response) {
       var route = null;
@@ -720,6 +720,25 @@ module Camel {
     return null;
   }
 
+  /**
+   * When lazy loading route info (using dumpRoutesAsXml() operation) we need MBean name from the folder
+   * and *not* from the selection
+   * @param workspace
+   * @param folder
+   */
+  export function getExpandingFolderCamelContextMBean(workspace:Core.Workspace, folder:Core.Folder) : string {
+    if (folder.entries && folder.entries["type"] === "routes") {
+      var result = workspace.tree.navigate("org.apache.camel", folder.entries["context"], "context");
+      if (result && result.children) {
+        var contextBean:any = result.children.first();
+        if (contextBean.objectName) {
+          return contextBean.objectName;
+        }
+      }
+    }
+    return null;
+  }
+
   export function getSelectionCamelContextEndpoints(workspace:Workspace) : Core.NodeSelection {
     if (workspace) {
       var contextId = getContextId(workspace);
@@ -831,6 +850,27 @@ module Camel {
     return null;
   }
 
+  export function getSelectionCamelEndpointRuntimeRegistry(workspace) : string {
+    if (workspace) {
+      var contextId = getContextId(workspace);
+      var selection = workspace.selection;
+      var tree = workspace.tree;
+      if (tree && selection) {
+        var domain = selection.domain;
+        if (domain && contextId) {
+          var result = tree.navigate(domain, contextId, "services");
+          if (result && result.children) {
+            var mbean = result.children.find(m => m.title.startsWith("DefaultRuntimeEndpointRegistry"));
+            if (mbean) {
+              return mbean.objectName;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   export function getSelectionCamelRouteMetrics(workspace) : string {
     if (workspace) {
       var contextId = getContextId(workspace);
@@ -852,6 +892,27 @@ module Camel {
     return null;
   }
 
+  export function getSelectionCamelMessageHistoryMetrics(workspace) : string {
+    if (workspace) {
+      var contextId = getContextId(workspace);
+      var selection = workspace.selection;
+      var tree = workspace.tree;
+      if (tree && selection) {
+        var domain = selection.domain;
+        if (domain && contextId) {
+          var result = tree.navigate(domain, contextId, "services");
+          if (result && result.children) {
+            var mbean = result.children.find(m => m.title.startsWith("MetricsMessageHistoryService"));
+            if (mbean) {
+              return mbean.objectName;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   export function getSelectionCamelInflightRepository(workspace) : string {
     if (workspace) {
       var contextId = getContextId(workspace);
@@ -863,6 +924,27 @@ module Camel {
           var result = tree.navigate(domain, contextId, "services");
           if (result && result.children) {
             var mbean = result.children.find(m => m.title.startsWith("DefaultInflightRepository"));
+            if (mbean) {
+              return mbean.objectName;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  export function getSelectionCamelBlockedExchanges(workspace) : string {
+    if (workspace) {
+      var contextId = getContextId(workspace);
+      var selection = workspace.selection;
+      var tree = workspace.tree;
+      if (tree && selection) {
+        var domain = selection.domain;
+        if (domain && contextId) {
+          var result = tree.navigate(domain, contextId, "services");
+          if (result && result.children) {
+            var mbean = result.children.find(m => m.title.startsWith("DefaultAsyncProcessorAwaitManager"));
             if (mbean) {
               return mbean.objectName;
             }
@@ -1114,6 +1196,21 @@ module Camel {
     });
   }
 
+  export function loadSelectedRouteXmlNodes($scope, doc, nodes, links, width, isSelectedRoute) {
+    var allRoutes = $(doc).find("route");
+    var routeDelta = width / allRoutes.length;
+    var rowX = 0;
+    allRoutes.each((idx, route) => {
+      var routeId = route.getAttribute("id");
+      var selected = isSelectedRoute(routeId);
+      log.debug("Is route " + routeId + " selected " + selected + " to show in route diagram");
+      if (selected) {
+        Camel.addRouteXmlChildren($scope, route, nodes, links, null, rowX, 0);
+        rowX += routeDelta;
+      }
+    });
+  }
+
   export function addRouteXmlChildren($scope, parent, nodes, links, parentId, parentX, parentY, parentNode = null) {
     var delta = 150;
     var x = parentX;
@@ -1176,7 +1273,7 @@ module Camel {
         //console.log("Image URL is " + imageUrl);
         var cid = route.getAttribute("_cid") || route.getAttribute("id");
         node = { "name": name, "label": label, "labelSummary": labelSummary, "group": 1, "id": id, "elementId": elementID,
-          "x": x, "y:": y, "imageUrl": imageUrl, "cid": cid, "tooltip": tooltip, "type": nodeId};
+          "x": x, "y:": y, "imageUrl": imageUrl, "cid": cid, "tooltip": tooltip, "type": nodeId, "uri": uri};
         if (rid) {
           node["rid"] = rid;
           if (!$scope.routeNodes) $scope.routeNodes = {};

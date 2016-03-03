@@ -281,7 +281,7 @@ module Fabric {
 
     // is it possible to delete selected containers? no, if deletion of container didn't complete
     $scope.mayDelete = () => {
-      return $scope.selectedContainers.length > 0 && $scope.selectedContainers.all((c) => { return !$scope.deletePending[c.id]; });
+      return $scope.selectedContainers.length > 0 && $scope.selectedContainers.all((c) => { return !$scope.deletePending[c.id] && !c.root});
     };
 
     $scope.confirmDeleteDialog = {
@@ -569,6 +569,18 @@ module Fabric {
     if (!iconURL) {
       return iconURL;
     }
+    var components = iconURL.split('/');
+    var normalized = "";
+    components.each((c) => {
+      normalized += '/';
+      if (/\.profile$/.test(c)) {
+        var profileName = c.substr(0, c.length - 8);
+        normalized += profileName.replace('-', '/') + ".profile";
+      } else {
+        normalized += c;
+      }
+    });
+    iconURL = normalized.substr(1);
     var connectionName = Core.getConnectionNameParameter(location.search);
     if (connectionName) {
       // If we're proxying...
@@ -577,11 +589,16 @@ module Fabric {
         // relative URLs are prefixed with /<base>/git/
         connectionOptions.path = /^\//.test(iconURL) ? iconURL : Core.url("/git/") + iconURL;
         iconURL = <string>Core.createServerConnectionUrl(connectionOptions);
+        // Fix iconURL in cases where jolokia URL was already set.
+        if (iconURL.endsWith('jolokia')) {
+            iconURL = iconURL.replace('jolokia', connectionOptions.path);
+        }
       }
     } else {
       // no proxy
       iconURL = /^\//.test(iconURL) ? iconURL : Core.url("/git/") + iconURL;
     }
+
     return iconURL;
   }
 

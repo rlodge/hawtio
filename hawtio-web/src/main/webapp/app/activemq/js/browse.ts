@@ -2,7 +2,15 @@
 module ActiveMQ {
   export var BrowseQueueController = _module.controller("ActiveMQ.BrowseQueueController", ["$scope", "workspace", "jolokia", "localStorage", '$location', "activeMQMessage", "$timeout", ($scope, workspace:Workspace, jolokia, localStorage, location, activeMQMessage, $timeout) => {
 
+    var log:Logging.Logger = Logger.get("ActiveMQ");
+
+    // all the queue names from the tree
+    $scope.queueNames = [];
+    // selected queue name in move dialog
+    $scope.queueName = null;
+
     $scope.searchText = '';
+    $scope.workspace = workspace;
 
     $scope.allMessages = [];
     $scope.messages = [];
@@ -68,7 +76,8 @@ module ActiveMQ {
           displayName: 'Correlation ID',
           width: '10%'
         }
-      ]
+      ],
+      afterSelectionChange: afterSelectionChange
     };
 
     $scope.showMessageDetails = false;
@@ -98,21 +107,24 @@ module ActiveMQ {
       }
     };
 
-    $scope.refresh = loadTable;
+    $scope.refresh = () => {
+      $scope.gridOptions.selectedItems.length = 0;
+      setTimeout(loadTable, 50);
+    }
 
     ActiveMQ.decorate($scope);
 
     $scope.moveMessages = () => {
         var selection = workspace.selection;
         var mbean = selection.objectName;
-        if (mbean && selection) {
+        if (mbean && selection && $scope.queueName) {
             var selectedItems = $scope.gridOptions.selectedItems;
             $scope.message = "Moved " + Core.maybePlural(selectedItems.length, "message" + " to " + $scope.queueName);
             var operation = "moveMessageTo(java.lang.String, java.lang.String)";
             angular.forEach(selectedItems, (item, idx) => {
                 var id = item.JMSMessageID;
                 if (id) {
-                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : moveSuccess;
+                    var callback = (idx + 1 < selectedItems.length) ? intermediateResult : operationSuccess;
                     jolokia.execute(mbean, operation, id, $scope.queueName, onSuccess(callback));
                 }
             });
@@ -164,13 +176,25 @@ module ActiveMQ {
       }
     };
 
-    $scope.queueNames = (completionText) => {
+    function retrieveQueueNames() {
       var queuesFolder = getSelectionQueuesFolder(workspace);
-      return (queuesFolder) ? queuesFolder.children.map(n => n.title) : [];
-    };
-
+      if (queuesFolder) {
+        var selectedQueue = workspace.selection.key;
+        var otherQueues = queuesFolder.children.exclude((child) => {return child.key == selectedQueue});
+        return (otherQueues)? otherQueues.map(n => n.title) : [];
+      } else {
+        return [];
+      }
+    }
 
     function populateTable(response) {
+      log.debug("populateTable");
+
+      // setup queue names
+      if ($scope.queueNames.length === 0) {
+        $scope.queueNames = retrieveQueueNames();
+      }
+
       var data = response.value;
       if (!angular.isArray(data)) {
         $scope.allMessages = [];
@@ -184,8 +208,8 @@ module ActiveMQ {
         message.headerHtml = createHeaderHtml(message);
         message.bodyText = createBodyText(message);
       });
-      Core.$apply($scope);
       filterMessages($scope.gridOptions.filterOptions.filterText);
+      Core.$apply($scope);
     }
 
     /*
@@ -362,19 +386,14 @@ module ActiveMQ {
 
     function operationSuccess() {
       $scope.messageDialog = false;
-      $scope.gridOptions.selectedItems.splice(0);
+      deselectAll();
       Core.notification("success", $scope.message);
       setTimeout(loadTable, 50);
-    }
-
-    function moveSuccess() {
-        operationSuccess();
-        workspace.loadTree();
+      Core.$apply($scope);
     }
 
     function filterMessages(filter) {
       var searchConditions = buildSearchConditions(filter);
-
       evalFilter(searchConditions);
     }
 
@@ -465,6 +484,20 @@ module ActiveMQ {
         }
       }
       return searchConditions;
+    }
+
+    function afterSelectionChange(rowItem, checkAll) {
+      if (checkAll === void 0) {
+        // then row was clicked, not select-all checkbox
+        $scope.gridOptions['$gridScope'].allSelected = rowItem.config.selectedItems.length == $scope.messages.length;
+      } else {
+        $scope.gridOptions['$gridScope'].allSelected = checkAll;
+      }
+    }
+
+    function deselectAll() {
+      $scope.gridOptions.selectedItems = [];
+      $scope.gridOptions['$gridScope'].allSelected = false;
     }
 
   }]);
