@@ -8,20 +8,22 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.zip.GZIPOutputStream;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import io.hawt.system.Helpers;
-import io.hawt.web.LoginTokenServlet;
-import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.api.console.Session;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.hawt.system.Helpers;
+import io.hawt.web.LoginTokenServlet;
 
 /**
  *
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class TerminalServlet extends HttpServlet {
 
     public static final int TERM_WIDTH = 120;
-    public static final int TERM_HEIGHT = 400;
+    public static final int TERM_HEIGHT = 39;
     private final static Logger LOG = LoggerFactory.getLogger(TerminalServlet.class);
 
     private static String KARAF4_FACTORY = "io.hawt.web.plugin.karaf.terminal.karaf4.Karaf4ConsoleFactory";
@@ -103,7 +105,7 @@ public class TerminalServlet extends HttpServlet {
         return bundleContext;
     }
 
-    Object createConsole(PipedInputStream in,
+    Object createSession(PipedInputStream in,
                          PrintStream pipedOut,
                          BundleContext bundleContext) throws Exception {
 
@@ -133,7 +135,7 @@ public class TerminalServlet extends HttpServlet {
     public class SessionTerminal implements Runnable {
 
         private Terminal terminal;
-        private Object console;
+        private Session session;
         private PipedOutputStream in;
         private PipedInputStream out;
         private boolean closed;
@@ -141,19 +143,17 @@ public class TerminalServlet extends HttpServlet {
         public SessionTerminal() throws IOException {
             try {
                 this.terminal = new Terminal(TERM_WIDTH, TERM_HEIGHT);
-                terminal.write("\u001b\u005B20\u0068"); // set newline mode on
 
                 in = new PipedOutputStream();
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
 
-                console = createConsole(new PipedInputStream(in), pipedOut, getBundleContext());
-                CommandSession session = factory.getSession(console);
+                session = (Session) createSession(new PipedInputStream(in), pipedOut, getBundleContext());
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 // TODO: user should likely be the logged in user, eg we can grab that from the user servlet
                 session.put("USER", "karaf");
                 session.put("COLUMNS", Integer.toString(TERM_WIDTH));
-                session.put("LINES", Integer.toString(/*TERM_HEIGHT*/39));
+                session.put("LINES", Integer.toString(TERM_HEIGHT));
             } catch (IOException e) {
                 LOG.info("Exception attaching to console", e);
                 throw e;
@@ -161,7 +161,7 @@ public class TerminalServlet extends HttpServlet {
                 LOG.info("Exception attaching to console", e);
                 throw (IOException) new IOException().initCause(e);
             }
-            new Thread((Runnable) console).start();
+            new Thread((Runnable) session).start();
             new Thread(this).start();
         }
 
@@ -170,7 +170,7 @@ public class TerminalServlet extends HttpServlet {
         }
 
         public void close() {
-            factory.close(console, true);
+            factory.close(session, true);
         }
 
         public String handle(String str, boolean forceDump) throws IOException {

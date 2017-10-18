@@ -21,3 +21,5 @@ hawtio-config
 .tscache
 node/
 bower_components/
+.vscode
+*.jfr

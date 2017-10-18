@@ -1,7 +1,98 @@
 
 ### Change Log
 
+#### 1.5.5 (To be released)
+
+* Upgraded to Camel 2.20.0
+
+#### 1.5.4
+
+* Fixed hawtio spring-boot starter to adhere to `management.port` property
+* Various bug fixes
+
+#### 1.5.3
+
+* Quartz plugin can now be triggered manually via play button
+* Upgraded to Jolokia 1.3.7
+* Upgraded to Camel 2.19.2
+* Various bug fixes
+
+#### 1.5.2
+
+* Added a new java.lang.Runtime plugin
+* IDE plugin modification and update
+* Various fixes and improvements
+* Upgraded to Camel 2.19.1
+* Upgraded to JGit 4.8.x
+
+#### 1.5.1
+
+* New Diagnostics plugin using JVM Flight Recorder
+* Proxy whitelist is automatically constructed based on network interfaces for local machine.
+  You can continue to use `hawtio.proxyWhitelist` system properties for further customisation.
+* Proxy whitelist supports regex by prefixing them with `r:` in the `hawtio.proxyWhitelist` system property
+* Upgraded to Camel 2.19.0
+* Upgraded to Spring Boot 1.5.3
+* Upgraded to Jolokia 1.3.6
+* Upgraded to JGit 4.7.x
+* Various bug fixes
+
+#### 1.5.0
+
+* Hawtio 1.5 requires Java 1.8 onwards
+* Turned `ProxyServlet` to whitelist-based host selection model for security reasons.
+  Now only `localhost` / `127.0.0.1` is allowed in the remote JVM connect plugin by default.
+  To connect to other hosts you need to add them to whitelist either at `proxyWhitelist`
+  init parameter in `web.xml` or through `hawtio.proxyWhitelist` system property.
+* Upgraded to Camel 2.18.2
+* Upgraded to Spring Boot 1.5.1
+
+Hawtio 1.4.x is now in maintenance mode.
+
+#### 1.4.68
+
+* Fixed hawtio-wildfly to run on WildFly / JBoss EAP even after JBoss RBAC is enabled
+* Fixed an issue whereby many pages where flickering
+* Upgraded to Camel 2.18.1
+* The Karaf Terminal plugin now works again when using Karaf 4.0.7 or newer.
+
+#### 1.4.67
+
+* Fixed hawtio-app may not start due two different versions of http-client included.
+
+#### 1.4.66
+
+* Now every Jolokia call within Hawtio is checked based on RBAC. This means Hawtio is made more secure, but
+  you may also encounter a bunch of access exceptions. Most of those exceptions are not a Hawtio bug, but
+  just indicate lack of some necessary RBAC configurations on the container, e.g. Karaf ACL files.
+  You can resolve those exceptions by fulfilling the required configurations on the running container.
+* Added support for customization of Jolokia through Java system properties, i.e.:
+  `-Djolokia.policyLocation=file:///home/fuse/my-access.xml`
+* Added new pages to the ActiveMQ plugin for monitoring brokers with large number of destinations
+* Improved KeyCloak plugin to better support WildFly and EAP
+* Various fixes and improvements for RBAC on Hawtio web UI
+* Upgraded to Camel 2.18.0
+* Upgraded to Jolokia 1.3.5
+* KeyCloak updated to 2.2.1
+
+#### 1.4.65
+
+* Upgraded to Camel 2.17.1
+* The Camel JMX domain name can be configured in the preference
+* Various other small bug fixes
+
+#### 1.4.64
+
+* Added more icons for various Camel endpoints and a few more EIPs
+* Upgraded to Camel 2.17.0
+* Various other small bug fixes
+
 #### 1.4.63
+
+* hawtio can be installed in Apache Karaf 2.4.x again if you install the `hawtio-core` feature. Log and Terminal plugin is not supported on Karaf 2.x.
+* upgraded to KeyCloack 1.9.1
+
+#### 1.4.62
 
 * Add `hawtio:type=security,name=RBACRegistry` JMX bean that provides optimized version of Jolokia `list` operation.
   Normally, Jolokia fetches and marshalls each MBeanInfo it can find. When there are thousands of same MBeanInfos
@@ -9,9 +100,10 @@
   is shared in special cases which greatly improves performance.
 * When displaying a table of JMX attributes for a list of MBeans, data is fetched only for visible (non-filtered)
   objects. After clearing/changing filter, old Jolokia requests are unregistered and new ones are created.
-
-#### 1.4.62
-
+* Fixed the AcitveMQ plugin to show the browse message dialog again, after it has been closed previously.
+* Increased the default jolokia max collection limit from 5000 to 50000 to ensure JVMs with many mbeans are all populated in hawtio
+* Removed a bunch of outdated help pages in the plugins to trim down the distribution size.
+* Added back the missing icons for the Camel debugger which was missing in the previous release.
 * Add option to control whether hawtio should automatic open the web console in the browser or not, when running hawtio-app.
 * Hawtio now supports url links to auto connect remote JVMs where the options is provided as url parameters in the link.
       such as: /hawtio/index.html#/jvm/connect?name=xxx&host=xxx&port=xxx&path=xxx&userName=xxx&password=xxx
@@ -171,7 +263,7 @@
 #### 1.4.30
 
 * Bug fixes
-* Fixed Camel diagram to render in Firefox browser 
+* Fixed Camel diagram to render in Firefox browser
 * Hawtio Karaf Terminal now installs and works in Karaf 2.x and 3.0.x out of the box
 * Upgraded to TypeScript 1.1.0
 * Fixed jolokia connectivity to Java containers with jolokia when running Kubernetes on RHEL / Fedora / Vagrant
@@ -300,7 +392,7 @@
 * Perspective switcher now also maintains a list of 5 recently used connections automatically
 * Added [fabric8](http://fabric8.io/) branding plugin
 * Fixed some minor bugs and issues in the fabric plugin.
-* Upgraded to [Jolokia](http://jolokia.org/) 1.2.1 
+* Upgraded to [Jolokia](http://jolokia.org/) 1.2.1
 * Fixes [these 18 issues and enhancements](https://github.com/hawtio/hawtio/issues?milestone=11&state=closed)
 
 #### 1.3.1
@@ -382,7 +474,7 @@
 #### 1.1
 
 * Added the following new plugins:
-  * [forms](https://github.com/hawtio/hawtio/blob/master/hawtio-web/src/main/webapp/app/forms/doc/developer.md) a developer plugin for automatically creating tables and forms from json-schema models 
+  * [forms](https://github.com/hawtio/hawtio/blob/master/hawtio-web/src/main/webapp/app/forms/doc/developer.md) a developer plugin for automatically creating tables and forms from json-schema models
   * [infinispan](http://hawt.io/plugins/infinispan/) for viewing metrics for your Infinispan caches or using the CLI to query or update them
   * [jclouds](http://hawt.io/plugins/jclouds/) to help make your cloud hawt
   * [maven](http://hawt.io/plugins/maven/) to let you search maven repositories, find versions, view source or javadoc
@@ -395,4 +487,3 @@
 
 * First main release of hawtio with [lots of hawt plugins](http://hawt.io/plugins/index.html).
 * Fixes [these 74 issues and enhancements](https://github.com/hawtio/hawtio/issues?milestone=1&state=closed)
-

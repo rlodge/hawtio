@@ -53,8 +53,8 @@
     <context>/hawtio</context>
     <hawtio-config-dir>${basedir}/hawtio-config</hawtio-config-dir>
     <hawtio-config-repo>https://github.com/hawtio/hawtio-config.git</hawtio-config-repo>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
 
     <webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
     <webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
@@ -65,32 +65,28 @@
     <fabric-test-version>${fabric-version}</fabric-test-version>
     <fabric-version>1.2.0.Beta4</fabric-version>
 
-    <activemq-version>5.12.1</activemq-version>
+    <activemq-version>5.14.1</activemq-version>
     <activemq-leveldb-artifactid>activemq-leveldb-store</activemq-leveldb-artifactid>
     <aether-version>1.13.1</aether-version>
     <atmosphere-version>1.0.18</atmosphere-version>
     <blueprint-web-version>1.0.0</blueprint-web-version>
     <build-helper-maven-plugin-version>1.7</build-helper-maven-plugin-version>
-    <camel-version>2.16.2</camel-version>
+    <camel-version>2.20.0</camel-version>
     <commons-codec-version>1.10</commons-codec-version>
-    <commons-fileupload-version>1.3.1</commons-fileupload-version>
-    <commons-httpclient-version>3.1</commons-httpclient-version>
+    <commons-fileupload-version>1.3.2</commons-fileupload-version>
+    <httpclient-version>4.5.2</httpclient-version>
     <commons-io-version>2.2</commons-io-version>
     <commons-logging-version>1.1.3</commons-logging-version>
-    <cxf-version>3.1.4</cxf-version>
+    <cxf-version>3.1.6</cxf-version>
     <dozer-version>5.5.1</dozer-version>
-    <exec-maven-plugin-version>1.4.0</exec-maven-plugin-version>
+    <exec-maven-plugin-version>1.5.0</exec-maven-plugin-version>
     <felix.gogo.version>0.16.2</felix.gogo.version>
     <frontend-maven-plugin-version>0.0.24</frontend-maven-plugin-version>
-    <gitective-version>0.9.12</gitective-version>
+    <gitective-version>0.9.23</gitective-version>
 
-    <!-- We are using an old guava to avoid breaking ActiveMQ in the test cases of hawtio-web -->
-    <!--
-        <guava-version>13.0.1</guava-version>
-    -->
-    <guava-version>10.0</guava-version>
-    <guava.version>14.0.1</guava.version>
-    <hawtio-release-version>1.4.19</hawtio-release-version>
+    <guava-version>21.0</guava-version>
+    <guava14-version>14.0.1</guava14-version>
+    <hawtio-release-version>1.5.1</hawtio-release-version>
     <infinispan-version>5.3.0.Final</infinispan-version>
 <!--
     TODO doesn't yet work - I think the config changed?
@@ -101,7 +97,7 @@
     <jackson-version>2.7.0</jackson-version>
     <jackson-version-range>[2.5,3)</jackson-version-range>
 
-    <javaewah-version>1.0.2</javaewah-version>
+    <javaewah-version>1.1.6</javaewah-version>
     <!-- make sure to align jaxb with fabric8 -->
     <jaxb-version>2.2.7</jaxb-version>
     <jcraft-version>0.1.49</jcraft-version>
@@ -112,16 +108,17 @@
     <jetty-plugin-version>${jetty-version}</jetty-plugin-version>
     <jetty-webapp-artifactId>jetty-webapp</jetty-webapp-artifactId>
 
-    <jgit-version>4.2.0.201601211800-r</jgit-version>
-    <jline.version>2.13</jline.version>
-    <jolokia-version>1.3.3</jolokia-version>
+    <jgit-version>4.9.0.201710071750-r</jgit-version>
+    <jline.version>3.2.0</jline.version>
+    <jolokia-version>1.3.7</jolokia-version>
     <junit-version>4.11</junit-version>
-    <karaf-version>4.0.4</karaf-version>
+    <karaf-version>4.1.2</karaf-version>
+    <karaf-version-range>[3.0,5)</karaf-version-range>
     <log4j-version>1.2.17</log4j-version>
     <maven-version>3.0.4</maven-version>
     <maven-antrun-plugin-version>1.7</maven-antrun-plugin-version>
-    <maven-bundle-plugin-version>2.3.7</maven-bundle-plugin-version>
-    <maven-plugin-version>3.2</maven-plugin-version>
+    <maven-bundle-plugin-version>3.0.1</maven-bundle-plugin-version>
+    <maven-plugin-version>3.3</maven-plugin-version>
     <maven-source-plugin-version>2.1.2</maven-source-plugin-version>
     <maven-resources-plugin-version>2.6</maven-resources-plugin-version>
     <maven-surefire-plugin-version>2.19.1</maven-surefire-plugin-version>
@@ -134,10 +131,10 @@
 
     <!-- use slf4j-api 1.6.x to be easy compatible with older Karaf/Camel releases -->
     <slf4j-api-version>1.6.6</slf4j-api-version>
-    <slf4j-version>1.7.13</slf4j-version>
+    <slf4j-version>1.7.21</slf4j-version>
 
-    <spring-version>4.1.9.RELEASE</spring-version>
-    <spring-boot-version>1.3.2.RELEASE</spring-boot-version>
+    <spring-version>4.3.10.RELEASE</spring-version>
+    <spring-boot-version>1.5.6.RELEASE</spring-boot-version>
     <unsigner-maven-plugin-version>0.2</unsigner-maven-plugin-version>
     <wagon-version>2.7</wagon-version>
     <war-plugin-version>2.1.1</war-plugin-version>
@@ -314,20 +311,6 @@
         </configuration>
       </plugin>
 
-      <!-- plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin -->
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -353,25 +336,6 @@
   </build>
 
   <profiles>
-
-    <profile>
-      <id>doclint-java8-disable</id>
-      <activation>
-        <jdk>[1.8, 2)</jdk>
-      </activation>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
 
     <!-- watcher profile is needed to break build cycle with fabric -->
     <profile>
@@ -499,6 +463,7 @@
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
               <encoding>${project.build.sourceEncoding}</encoding>
+              <additionalparam>-Xdoclint:none</additionalparam>
             </configuration>
             <executions>
               <execution>
@@ -574,12 +539,12 @@
       </build>
     </profile>
 
-      <profile>
-          <id>apidocs</id>
-          <modules>
-              <module>hawtio-api-docs</module>
-          </modules>
-      </profile>
+    <profile>
+      <id>apidocs</id>
+      <modules>
+        <module>hawtio-api-docs</module>
+      </modules>
+    </profile>
 
   </profiles>
 </project>

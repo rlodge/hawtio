@@ -66,6 +66,12 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava-version}</version>
+    </dependency>
+
     <!-- Git module -->
     <dependency>
       <groupId>io.hawt</groupId>
@@ -142,17 +148,18 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>io.hawt</groupId>
+      <artifactId>hawtio-ide</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit-version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>${guava-version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -248,10 +255,15 @@
       <version>${camel-version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- use jetty 8 as hawtio project is setup for that version -->
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-jetty8</artifactId>
+      <artifactId>camel-jetty9</artifactId>
+      <version>${camel-version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-restlet</artifactId>
       <version>${camel-version}</version>
       <scope>test</scope>
     </dependency>
@@ -614,16 +626,18 @@
 
             <!-- fix jgit, and slf4j imports -->
             <Import-Package>
+              org.osgi.framework;version="[1.5,2)",
+              org.osgi.framework.wiring;version="[1.0,2)",
+              org.osgi.util.tracker,
               io.hawt.git;resolution:=optional;version="[1.4,2)",
               io.hawt.util;resolution:=optional;version="[1.4,2)",
               io.hawt.util.introspect;resolution:=optional;version="[1.4,2)",
               io.hawt.util.introspect.support;resolution:=optional;version="[1.4,2)",
-              org.osgi.framework;version="[1.5,2)",
-              org.osgi.util.tracker,
               org.eclipse.jetty.plus.jaas.spi;resolution:=optional,
               org.eclipse.jetty.plus.jaas.callback;resolution:=optional,
               org.apache.commons.logging;resolution:=optional,
               org.slf4j;resolution:=optional;version="[1.6,2)",
+              org.apache.karaf.jaas.boot.principal;resolution:=optional,
               !org.slf4j.impl,
               !org.apache.avalon*,
               !org.apache.log*,
@@ -634,12 +648,10 @@
               !userauth,
               !com.ibm.uvm.tools*,!com.sun.jdmk.comm*,!javax.jmdns*,!javax.jms*,!javax.portlet*,
               !org.apache.commons.io*,
-              org.apache.karaf.jaas.boot.principal;resolution:=optional,
+              !com.google.errorprone.annotations.concurrent,
               *
             </Import-Package>
-            <Private-Package>
-              javaewah
-            </Private-Package>
+            <Private-Package />
 
             <Bundle-ClassPath>.</Bundle-ClassPath>
             <Bundle-Name>${project.description}</Bundle-Name>

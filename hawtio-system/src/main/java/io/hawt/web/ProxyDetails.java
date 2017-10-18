@@ -1,5 +1,7 @@
 package io.hawt.web;
 
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A helper object to store the proxy location details
  */
-public class ProxyDetails implements ProxyAddress {
+public class ProxyDetails {
     private static final transient Logger LOG = LoggerFactory.getLogger(ProxyDetails.class);
 
     private boolean invalid;
@@ -99,6 +101,27 @@ public class ProxyDetails implements ProxyAddress {
         }
     }
 
+    public boolean isAllowed(Set<String> whitelist) {
+        if (whitelist.contains("*")) {
+            return true;
+        }
+        // host may contain port number! (e.g. "localhost:9000")
+        return whitelist.contains(host.split(":")[0]);
+    }
+
+    public boolean isAllowed(List<Pattern> regexWhitelist) {
+        // host may contain port number! (e.g. "localhost:9000")
+        String hostWithoutPort = host.split(":")[0];
+
+        for (Pattern pattern : regexWhitelist) {
+            if (pattern.matcher(hostWithoutPort).matches()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public String toString() {
         return "ProxyDetails{" +
@@ -106,7 +129,6 @@ public class ProxyDetails implements ProxyAddress {
                 + "}";
     }
 
-    @Override
     public String getFullProxyUrl() {
         if (invalid) {
             return null;
@@ -141,12 +163,10 @@ public class ProxyDetails implements ProxyAddress {
         return port;
     }
 
-    @Override
     public String getUserName() {
         return userName;
     }
 
-    @Override
     public String getPassword() {
         return password;
     }

@@ -32,6 +32,7 @@ module Core {
     public mbeanTypesToDomain = {};
     public mbeanServicesToDomain = {};
     public attributeColumnDefs = {};
+    public onClickRowHandlers = {};
     public treePostProcessors = [];
     public topLevelTabs = <Array<NavMenuItem>>[];
     public subLevelTabs = [];
@@ -87,23 +88,13 @@ module Core {
     }
 
     public jolokiaList(cb, flags):any {
-      if (this.jolokiaStatus.listMethod == LIST_GENERAL) {
+      if (this.jolokiaStatus.listMethod != LIST_WITH_RBAC) {
         return this.jolokia.list(null, onSuccess(cb, flags));
       } else {
         flags.maxDepth = 9;
         var res = this.jolokia.execute(this.jolokiaStatus.listMBean, "list()", onSuccess(cb, flags));
-        if (res['domains'] && res['cache']) {
-          // post process cached RBAC info
-          for (var domainName in res['domains']) {
-            var domainClass = escapeDots(domainName);
-            var domain = <Core.JMXDomain> res['domains'][domainName];
-            for (var mbeanName in domain) {
-              if (angular.isString(domain[mbeanName])) {
-                domain[mbeanName] = <Core.JMXMBean>res['cache']["" + domain[mbeanName]];
-              }
-            }
-          }
-          return res['domains'];
+        if (res) {
+          return this.unwindResponseWithRBACCache(res);
         }
       }
     }
@@ -203,12 +194,33 @@ module Core {
         var workspace = this;
         function wrapInValue(response) {
           var wrapper = {
-            value: response
+            value: workspace.unwindResponseWithRBACCache(response)
           };
           workspace.populateTree(wrapper);
         }
         this.jolokiaList(wrapInValue, {ignoreErrors: true, maxDepth: 8});
       }
+    }
+
+    /**
+     * Processes response from jolokia list - if it contains "domains" and "cache" properties
+     * @param res
+     */
+    public unwindResponseWithRBACCache(res) {
+      if (res['domains'] && res['cache']) {
+        // post process cached RBAC info
+        for (var domainName in res['domains']) {
+          var domainClass = escapeDots(domainName);
+          var domain = <Core.JMXDomain> res['domains'][domainName];
+          for (var mbeanName in domain) {
+            if (angular.isString(domain[mbeanName])) {
+              domain[mbeanName] = <Core.JMXMBean>res['cache']["" + domain[mbeanName]];
+            }
+          }
+        }
+        return res['domains'];
+      }
+      return res;
     }
 
     public folderGetOrElse(folder, value) {
@@ -236,6 +248,9 @@ module Core {
       for (var domainName in domains) {
         var domainClass = escapeDots(domainName);
         var domain = <Core.JMXDomain> domains[domainName];
+        // domain name is displayed in the tree, so let's escape it here
+        // Core.escapeHtml() and _.escape() cannot be used, as escaping '"' breaks Camel tree...
+        domainName = Jmx.escapeTagOnly(domainName);
         for (var mbeanName in domain) {
           log.debug("JMX tree mbean name: " + mbeanName);
           var entries = {};
@@ -264,7 +279,9 @@ module Core {
               kv[0] = item;
             }
             var key = kv[0];
-            var value = kv[1] || key;
+            // mbean property value is displayed in the tree, so let's escape it here
+            // Core.escapeHtml() and _.escape() cannot be used, as escaping '"' breaks Camel tree...
+            var value = Jmx.escapeTagOnly(kv[1] || key);
             entries[key] = value;
             var moveToFront = false;
             var lowerKey = key.toLowerCase();
@@ -804,15 +821,31 @@ module Core {
                   log.debug("Could not find method:", method, " to check permissions, skipping");
                   return;
                 }
-                if (angular.isDefined(op.canInvoke)) {
-                  canInvoke = op.canInvoke;
-                }
+                canInvoke = this.resolveCanInvoke(op);
               });
             }
           }
         }
       } 
       return canInvoke;
+    }
+
+    private resolveCanInvoke(op) {
+      // for single method
+      if (!angular.isArray(op)) {
+        if (angular.isDefined(op.canInvoke)) {
+          return op.canInvoke;
+        } else {
+          return true;
+        }
+      }
+
+      // for overloaded methods
+      // returns true only if all overloaded methods can be invoked (i.e. canInvoke=true)
+      var cantInvoke = (<Array<any>> op).find((o) =>
+        angular.isDefined(o.canInvoke) && !o.canInvoke
+      );
+      return !angular.isDefined(cantInvoke);
     }
 
     public treeContainsDomainAndProperties(domainName, properties = null) {
@@ -954,35 +987,35 @@ module Core {
       return this.hasDomainAndProperties('io.fabric8');
     }
 
-    isCamelContext() {
-      return this.hasDomainAndProperties('org.apache.camel', {type: 'context'});
+    isCamelContext(camelJmxDomain) {
+      return this.hasDomainAndProperties(camelJmxDomain, {type: 'context'});
     }
-    isCamelFolder() {
-      return this.hasDomainAndProperties('org.apache.camel');
+    isCamelFolder(camelJmxDomain) {
+      return this.hasDomainAndProperties(camelJmxDomain);
     }
-    isComponentsFolder() {
-      return this.selectionHasDomainAndLastFolderName('org.apache.camel', 'components');
+    isComponentsFolder(camelJmxDomain) {
+      return this.selectionHasDomainAndLastFolderName(camelJmxDomain, 'components');
     }
-    isComponent() {
-      return this.hasDomainAndProperties('org.apache.camel', {type: 'components'});
+    isComponent(camelJmxDomain) {
+      return this.hasDomainAndProperties(camelJmxDomain, {type: 'components'});
     }
-    isEndpointsFolder() {
-      return this.selectionHasDomainAndLastFolderName('org.apache.camel', 'endpoints');
+    isEndpointsFolder(camelJmxDomain) {
+      return this.selectionHasDomainAndLastFolderName(camelJmxDomain, 'endpoints');
     }
-    isEndpoint() {
-      return this.hasDomainAndProperties('org.apache.camel', {type: 'endpoints'});
+    isEndpoint(camelJmxDomain) {
+      return this.hasDomainAndProperties(camelJmxDomain, {type: 'endpoints'});
     }
-    isDataFormatsFolder() {
-      return this.selectionHasDomainAndLastFolderName('org.apache.camel', 'dataformats');
+    isDataFormatsFolder(camelJmxDomain) {
+      return this.selectionHasDomainAndLastFolderName(camelJmxDomain, 'dataformats');
     }
-    isDataFormat() {
-      return this.hasDomainAndProperties('org.apache.camel', {type: 'dataformats'});
+    isDataFormat(camelJmxDomain) {
+      return this.hasDomainAndProperties(camelJmxDomain, {type: 'dataformats'});
     }
-    isRoutesFolder() {
-      return this.selectionHasDomainAndLastFolderName('org.apache.camel', 'routes')
+    isRoutesFolder(camelJmxDomain) {
+      return this.selectionHasDomainAndLastFolderName(camelJmxDomain, 'routes')
     }
-    isRoute() {
-      return this.hasDomainAndProperties('org.apache.camel', {type: 'routes'});
+    isRoute(camelJmxDomain) {
+      return this.hasDomainAndProperties(camelJmxDomain, {type: 'routes'});
     }
 
     isOsgiFolder() {

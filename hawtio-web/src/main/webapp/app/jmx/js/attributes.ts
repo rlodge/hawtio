@@ -2,6 +2,8 @@
  * @module Jmx
  */
 /// <reference path="./jmxPlugin.ts"/>
+/// <reference path="../../core/js/coreHelpers.ts"/>
+/// <reference path="../../helpers/js/filterHelpers.ts"/>
 module Jmx {
 
   export var propertiesColumnDefs = [
@@ -26,16 +28,18 @@ module Jmx {
     }
   ];
 
-  export var AttributesController = _module.controller("Jmx.AttributesController", ["$scope", "$element", "$location", "workspace", "jolokia", "jmxWidgets", "jmxWidgetTypes", "$templateCache", "localStorage", "$browser", ($scope,
-                                       $element,
-                                       $location,
-                                       workspace:Workspace,
-                                       jolokia,
-                                       jmxWidgets,
-                                       jmxWidgetTypes,
-                                       $templateCache,
-                                       localStorage,
-                                        $browser) => {
+  export var AttributesController = _module.controller("Jmx.AttributesController", ["$scope", "$element", "$location", "workspace", "jolokia", "jmxWidgets", "jmxWidgetTypes", "$templateCache", "localStorage", "$browser", (
+      $scope,
+      $element,
+      $location,
+      workspace: Workspace,
+      jolokia: Jolokia.IJolokia,
+      jmxWidgets,
+      jmxWidgetTypes,
+      $templateCache: ng.ITemplateCacheService,
+      localStorage: WindowLocalStorage,
+      $browser) => {
+
     $scope.searchText = '';
     $scope.nid = 'empty';
     $scope.selectedItems = [];
@@ -130,7 +134,15 @@ module Jmx {
       $scope.nid = $location.search()['nid'];
       log.debug("nid: ", $scope.nid);
 
-      setTimeout(updateTableContents, 50);
+      pendingUpdate = setTimeout(updateTableContents, 50);
+    });
+
+    $scope.$on('jmxTreeUpdated', function () {
+      Core.unregister(jolokia, $scope);
+      if (pendingUpdate) {
+        clearTimeout(pendingUpdate);
+      }
+      pendingUpdate = setTimeout(updateTableContents, 500);
     });
 
     var pendingUpdate = null;
@@ -140,9 +152,7 @@ module Jmx {
       if (pendingUpdate) {
         clearTimeout(pendingUpdate);
       }
-      pendingUpdate = setTimeout(() => {
-        updateTableContents();
-      }, 500);
+      pendingUpdate = setTimeout(updateTableContents, 500);
     });
 
     $scope.$watch('workspace.selection', function () {
@@ -150,12 +160,13 @@ module Jmx {
         Core.unregister(jolokia, $scope);
         return;
       }
-      setTimeout(() => {
+      if (pendingUpdate) {
+        clearTimeout(pendingUpdate);
+      }
+      pendingUpdate = setTimeout(() => {
         $scope.gridData = [];
         Core.$apply($scope);
-        setTimeout(() => {
-          updateTableContents();
-        }, 10);
+        setTimeout(updateTableContents, 10);
       }, 10);
     });
 
@@ -198,8 +209,9 @@ module Jmx {
       $scope.entity["description"] = row.attrDesc;
       $scope.entity["type"] = row.type;
 
+      var mbean = escapeMBean(workspace.getSelectedMBeanName());
       var url = $location.protocol() + "://" + $location.host() + ":" + $location.port() + $browser.baseHref();
-      $scope.entity["jolokia"] = url + localStorage["url"] + "/read/" + workspace.getSelectedMBeanName() + "/" + $scope.entity["key"] ;
+      $scope.entity["jolokia"] = url + localStorage["url"] + "/read/" + mbean + "/" + $scope.entity["key"] ;
       $scope.entity["rw"] = row.rw;
       var type = asJsonSchemaType(row.type, row.key);
       var readOnly = !row.rw;
@@ -462,6 +474,8 @@ module Jmx {
         if (children) {
           var childNodes = children.map((child) => child.objectName);
           var mbeans = childNodes.filter((mbean) => FilterHelpers.search(mbean, $scope.gridOptions.filterOptions.filterText));
+          var maxFolderSize = localStorage["jmxMaxFolderSize"];
+          mbeans = mbeans.slice(0, maxFolderSize);
           if (mbeans) {
             var typeNames = Jmx.getUniqueTypeNames(children);
             if (typeNames.length <= 1) {
@@ -527,7 +541,10 @@ module Jmx {
 
             if (!$scope.gridOptions.columnDefs.length) {
               // lets update the column definitions based on any configured defaults
+
               var key = workspace.selectionConfigKey();
+              $scope.gridOptions.gridKey = key;
+              $scope.gridOptions.onClickRowHandlers = workspace.onClickRowHandlers;
               var defaultDefs = workspace.attributeColumnDefs[key] || [];
               var defaultSize = defaultDefs.length;
               var map = {};
@@ -570,6 +587,12 @@ module Jmx {
               $scope.gridOptions.enableRowClickSelection = true;
             }
           }
+          // mask attribute read error
+          angular.forEach(data, (value, key) => {
+            if (includePropertyValue(key, value)) {
+              data[key] = maskReadError(value);
+            }
+          });
           // assume 1 row of data per mbean
           $scope.gridData[idx] = data;
           addHandlerFunctions($scope.gridData);
@@ -610,7 +633,11 @@ module Jmx {
                 }
                 // the value must be string as the sorting/filtering of the table relies on that
                 var type = lookupAttributeType(key);
-                var data = {key: key, name: Core.humanizeValue(key), value: safeNullAsString(value, type)};
+                var data = {
+                  key: key,
+                  name: Core.humanizeValue(key),
+                  value: maskReadError(safeNullAsString(value, type))
+                };
 
                 generateSummaryAndDetail(key, data);
                 properties.push(data);
@@ -638,6 +665,21 @@ module Jmx {
       }
     }
 
+    function maskReadError(value) {
+      if (typeof value !== 'string') {
+        return value;
+      }
+      var forbidden = /^ERROR: Reading attribute .+ \(class java\.lang\.SecurityException\)$/;
+      var unsupported = /^ERROR: java\.lang\.UnsupportedOperationException: .+ \(class javax\.management\.RuntimeMBeanException\)$/;
+      if (value.match(forbidden)) {
+        return "**********";
+      } else if (value.match(unsupported)) {
+        return "(Not supported)";
+      } else {
+        return value;
+      }
+    }
+
     function addHandlerFunctions(data) {
       data.forEach((item) => {
         item['inDashboard'] = $scope.inDashboard;
@@ -648,7 +690,7 @@ module Jmx {
           $scope.onViewAttribute(item);
         };
         item['folderIconClass'] = (row) => {
-          return $scope.folderIconClass(row);            
+          return $scope.folderIconClass(row);
         };
         item['folderHref'] = (row) => {
           return $scope.folderHref(row);

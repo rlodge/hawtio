@@ -67,6 +67,17 @@ module DataTable {
 
         var sortInfo = $scope.config.sortInfo;
 
+        // Set null fields to empty string as sugar sortBy doesn't handle them correctly
+        for (var rowKey in value) {
+          var row = value[rowKey];
+          for (var fieldKey in row) {
+            var field = row[fieldKey];
+            if (field === null) {
+              value[rowKey][fieldKey] = "";
+            }
+          }
+        }
+
         // enrich the rows with information about their index
         var idx = -1;
         $scope.rows = (value || []).sortBy(sortInfo.sortBy, !sortInfo.ascending).map(entity => {
@@ -225,7 +236,21 @@ module DataTable {
       };
 
       $scope.isSelected = (row) => {
-        return config.selectedItems.some(row.entity);
+        return (row) && config.selectedItems.some(s => {
+              var spk = primaryKeyFn(s, s.index);
+              var rpk = primaryKeyFn(row.entity, row.index);
+              return angular.equals(spk, rpk);
+            });
+      };
+
+      $scope.onRowClicked = (row) => {
+        var id = $scope.config.gridKey;
+        if(id){
+            var func = $scope.config.onClickRowHandlers[id];
+            if(func) {
+                func(row);
+            }
+        }
       };
 
       $scope.onRowSelected = (row) => {
@@ -259,7 +284,7 @@ module DataTable {
       }
       var headHtml = "<thead><tr>";
       // use a function to check if a row is selected so the UI can be kept up to date asap
-      var bodyHtml = "<tbody><tr ng-repeat='row in rows track by $index' ng-show='showRow(row)' " + onMouseDown + "ng-class=\"{'selected': isSelected(row)}\" >";
+      var bodyHtml = "<tbody><tr ng-repeat='row in rows track by $index' ng-show='showRow(row)' ng-click='onRowClicked(row)'" + onMouseDown + "ng-class=\"{'selected': isSelected(row)}\" >";
       var idx = 0;
       if (showCheckBox) {
         var toggleAllHtml = isMultiSelect() ?

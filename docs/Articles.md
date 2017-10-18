@@ -25,7 +25,7 @@
 
 The following videos are in the [hawtio video album](https://vimeo.com/album/3324251):
 
-* [create a hawtio pluing in 3 minutes](https://vimeo.com/123423650)
+* [create a hawtio plugin in 3 minutes](https://vimeo.com/123423650)
 * [add hawtio forms to your plugin](https://vimeo.com/123441243) using [hawtio-forms](https://github.com/hawtio/hawtio-forms)
 
 # Demos (1.x)
@@ -39,6 +39,7 @@ The following videos are in the [hawtio video album](https://vimeo.com/album/332
 
 The following videos has been found on the web about hawtio.  If you find any others please [let us know](http://hawt.io/community/index.html) or [raise an issue](https://github.com/hawtio/hawtio/issues?state=open) and we'll add it to the list.
 
+* [Hawt and spicy Java monitoring](https://vimeo.com/233817010) by Martin Skarsaune, at [JavaZone 2017](https://2017.javazone.no/).
 * [hawtio - the Extensive console](https://www.youtube.com/watch?v=Bxgk9--_WzE) by Stan Lewis, at [DevNation 2014](http://www.devnation.org/) presenting how you can extend and build your own plugins to hawtio. Highly recommended if you want to build custom plugins.
 * Hawtio on Talend ESB part [1](https://www.youtube.com/watch?v=lzdgxcHwfcY), [2](https://www.youtube.com/watch?v=_vjp8rg1DNQ), [3](https://www.youtube.com/watch?v=uJqG2JbXfkM) by [Robin Huiser](http://nl.linkedin.com/in/robinhuiser)
 
@@ -46,6 +47,7 @@ The following videos has been found on the web about hawtio.  If you find any ot
 
 The following articles have been found on the web about hawtio. If you find any others please [let us know](http://hawt.io/community/index.html) or [raise an issue](https://github.com/hawtio/hawtio/issues?state=open) and we'll add it to the list.
 
+* [Running Apache ActiveMQ and hawtio in Standalone Mode (2016)](http://www.bennet-schulz.com/2016/07/apache-activemq-and-hawtio.html) by [Bennet Schulz](https://twitter.com/bennetelli)
 * [Hawtio + ActiveMQ](http://www.christianposta.com/blog/?p=315) by [Christian Posta](http://www.christianposta.com/)
 * [Hawtio & Apache Jclouds](http://iocanel.blogspot.co.uk/2013/07/hawtio-apache-jclouds.html) by [Ioannis Canellos](http://iocanel.blogspot.co.uk/)
 * [Apache Camel web dashboard with hawtio](http://www.davsclaus.com/2013/04/apache-camel-web-dashboard-with-hawtio.html) by [Claus Ibsen](http://www.davsclaus.com)

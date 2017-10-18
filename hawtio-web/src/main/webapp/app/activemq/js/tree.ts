@@ -1,4 +1,5 @@
 /// <reference path="activemqPlugin.ts"/>
+/// <reference path="../../tree/js/treePlugin.ts"/>
 module ActiveMQ {
 
   _module.controller("ActiveMQ.TreeHeaderController", ["$scope", ($scope) => {
@@ -11,7 +12,11 @@ module ActiveMQ {
     };
   }]);
 
-  _module.controller("ActiveMQ.TreeController", ["$scope", "$location", "workspace", "localStorage", ($scope, $location:ng.ILocationService, workspace:Workspace, localStorage) => {
+  _module.controller("ActiveMQ.TreeController", ["$scope", "$location", "workspace", "localStorage", (
+      $scope,
+      $location: ng.ILocationService,
+      workspace: Workspace,
+      localStorage: WindowLocalStorage) => {
 
     var amqJmxDomain = localStorage['activemqJmxDomain'] || "org.apache.activemq";
 
@@ -58,7 +63,6 @@ module ActiveMQ {
         children.forEach(broker => {
           var grandChildren = broker.children;
           if (grandChildren) {
-            Tree.sanitize(grandChildren);
             var idx = grandChildren.findIndex(n => n.title === "Topic");
             if (idx > 0) {
               var old = grandChildren[idx];
@@ -91,14 +95,17 @@ module ActiveMQ {
 
     function updateSelectionFromURL() {
       Jmx.updateTreeSelectionFromURLAndAutoSelect($location, $("#activemqtree"), (first) => {
-        // use function to auto select the queue folder on the 1st broker
-        var queues = first.getChildren()[0];
-        if (queues && queues.data.title === 'Queue') {
-          first = queues;
-          first.expand(true);
-          return first;
+        if(first.getChildren() != null) {
+          // use function to auto select the queue folder on the 1st broker
+          var queues = first.getChildren()[0];
+          if (queues && queues.data.title === 'Queue') {
+            first = queues;
+            first.expand(true);
+            return first;
+          }
+        } else {
+          return null;
         }
-        return null;
       }, true);
     }
   }]);
